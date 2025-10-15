@@ -12,5 +12,5 @@ with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16', channels
         data = stream.read(4000)[0]
         if rec.AcceptWaveform(bytes(data)):
             print(rec.Result())
-        else:
-            print(rec.PartialResult())
+        if rec.Result().__contains__("hello"):
+            print("Heyo")
