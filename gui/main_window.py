@@ -1,20 +1,57 @@
-﻿from PyQt6.QtWidgets import QApplication, QWidget
-
-# Only needed for access to command line arguments
+﻿from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import *
 import sys
 
-# You need one (and only one) QApplication instance per application.
-# Pass in sys.argv to allow command line arguments for your app.
-# If you know you won't use command line arguments QApplication([]) works too.
+from gui.ui_compenents import EditableLabel
+
+
+class LabeledSlider(QWidget):
+    def __init__(self, label_text):
+        super().__init__()
+        self.label = QLabel(label_text)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.slider)
+        self.setLayout(layout)
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout()
+        self.setWindowTitle("My App")
+
+        label = EditableLabel()
+        slider = LabeledSlider("her ye")
+
+
+        button = QPushButton("Press Me!")
+        button.setCheckable(True)
+        button.clicked.connect(self.the_button_was_clicked)
+        button.clicked.connect(self.the_button_was_toggled)
+        button.setFixedSize(60, 40)
+
+
+        layout.addWidget(button)
+        layout.addWidget(slider)
+        layout.addWidget(label)
+
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
+    def the_button_was_clicked(self):
+        print("Clicked!")
+
+    def the_button_was_toggled(self, checked):
+        print("Checked?", checked)
+
+
 app = QApplication(sys.argv)
+app.setStyle("Fusion")
 
-# Create a Qt widget, which will be our window.
-window = QWidget()
-window.show()  # IMPORTANT!!!!! Windows are hidden by default.
 
-# Start the event loop.
+window = MainWindow()
+window.show()
+
 app.exec()
-
-
-# Your application won't reach here until you exit and the event
-# loop has stopped.
