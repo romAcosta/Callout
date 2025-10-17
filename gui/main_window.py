@@ -2,7 +2,8 @@
 from PyQt6.QtWidgets import *
 import sys
 
-from gui.ui_compenents import EditableLabel
+from gui.ui_compenents import EditableLabel, MacroUI, MacroMenu
+
 
 
 class LabeledSlider(QWidget):
@@ -22,7 +23,8 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         self.setWindowTitle("My App")
 
-        label = EditableLabel()
+        label = MacroMenu()
+
         slider = LabeledSlider("her ye")
 
 
