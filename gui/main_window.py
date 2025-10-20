@@ -48,12 +48,13 @@ class MainWindow(QMainWindow):
     def the_button_was_toggled(self, checked):
         print("Checked?", checked)
 
+def ActivateWindow():
+    app = QApplication(sys.argv)
+    app.setStyle("Fusion")
 
-app = QApplication(sys.argv)
-app.setStyle("Fusion")
 
+    window = MainWindow()
+    window.show()
 
-window = MainWindow()
-window.show()
-
-app.exec()
+    app.exec()
+ActivateWindow()
