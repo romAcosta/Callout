@@ -31,30 +31,35 @@ from backend.macros import GetPhrases, GetMacros
 def run_recognizer(control_q, result_q):
     path = os.path.abspath("models/vosk-model-small-en-us-0.15")
     model = vosk.Model(path)
+
+    #load macros and phrases from json
     phrases = GetPhrases()
     macros = GetMacros()
+
     silence_start = time.time()
     speaking = False
     threshold = 500
-    print(phrases)
+
     rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
+
     with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
                            channels=1, latency='low') as stream:
         while True:
             if not control_q.empty() and control_q.get() == "stop":
                 break
+
+
             data = stream.read(4000)[0]
             arr = np.frombuffer(data, np.int16)
             level = np.max(np.abs(arr))  # absolute amplitude
 
+            if level > threshold: #Checks if amplitude is at speaking threshold
 
-
-            if level > threshold:
                 rec.AcceptWaveform(bytes(data))
                 speaking = True
                 silence_start = time.time()
+            elif speaking and time.time() - silence_start > 0.2: #Forces a speach check after x amount of time passes
 
-            elif speaking and time.time() - silence_start > 0.2:
                 text = rec.FinalResult()
                 execute_macro(phrases, text, macros)
                 speaking = False
