@@ -57,4 +57,4 @@ def ActivateWindow():
     window.show()
 
     app.exec()
-ActivateWindow()
+# ActivateWindow()

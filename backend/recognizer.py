@@ -1,13 +1,17 @@
 import json
 import os
 import sys
-
+import numpy as np
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QIcon, QAction, QCursor
 import vosk
 import sounddevice as sd
+import time
+
 from backend.macro_executor import execute_macro
+from backend.macros import GetPhrases, GetMacros
+
 
 # path = os.path.abspath("../models/vosk-model-small-en-us-0.15")
 # model = vosk.Model(path)
@@ -21,22 +25,42 @@ from backend.macro_executor import execute_macro
 #
 #         execute_macro(rec.Result())
 
+
+
+
 def run_recognizer(control_q, result_q):
     path = os.path.abspath("models/vosk-model-small-en-us-0.15")
     model = vosk.Model(path)
-    rec = vosk.KaldiRecognizer(model, 16000, json.dumps(["open browser", "close window", "reload"]))
-    with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16', channels=1) as stream:
+    phrases = GetPhrases()
+    macros = GetMacros()
+    silence_start = time.time()
+    speaking = False
+    threshold = 500
+    print(phrases)
+    rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
+    with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
+                           channels=1, latency='low') as stream:
         while True:
             if not control_q.empty() and control_q.get() == "stop":
                 break
             data = stream.read(4000)[0]
-            if rec.AcceptWaveform(bytes(data)):
-                text = json.loads(rec.Result())["text"]
-                result_q.put(text)
-            execute_macro(rec.Result())
+            arr = np.frombuffer(data, np.int16)
+            level = np.max(np.abs(arr))  # absolute amplitude
 
 
-def tray_app(control_q):
+
+            if level > threshold:
+                rec.AcceptWaveform(bytes(data))
+                speaking = True
+                silence_start = time.time()
+
+            elif speaking and time.time() - silence_start > 0.2:
+                text = rec.FinalResult()
+                execute_macro(phrases, text, macros)
+                speaking = False
+                silence_start = time.time()
+
+def tray_app():
     app = QApplication(sys.argv)
     tray = QSystemTrayIcon(QIcon("assets/icon.png"))
     tray.setToolTip("Callout Backend")

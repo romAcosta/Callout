@@ -25,7 +25,7 @@ if __name__ == "__main__":
     recognizer_process = Process(target=run_recognizer, args=(control_q, result_q))
     recognizer_process.start()
 
-    app, tray = tray_app(control_q)
+    app, tray = tray_app()
 
     def poll_results():
         if not result_q.empty():

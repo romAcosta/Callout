@@ -1,0 +1,18 @@
+{
+    "phrases": [
+        "hello",
+        "okay"
+    ],
+    "macros": [
+        {
+            "phrase": "hello",
+            "type": 1,
+            "command": "p"
+        },
+        {
+            "phrase": "okay",
+            "type": 1,
+            "command": "9"
+        }
+    ]
+}
