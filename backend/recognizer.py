@@ -10,7 +10,8 @@ import sounddevice as sd
 import time
 
 from backend.macro_executor import execute_macro
-from backend.macros import GetPhrases, GetMacros
+from backend.macro_json_editor import  JSON_Editor
+from gui.main_window import MainWindow
 
 
 # path = os.path.abspath("../models/vosk-model-small-en-us-0.15")
@@ -33,8 +34,9 @@ def run_recognizer(control_q, result_q):
     model = vosk.Model(path)
 
     #load macros and phrases from json
-    phrases = GetPhrases()
-    macros = GetMacros()
+    json_ed = JSON_Editor("resources/default_profile.json")
+    phrases = json_ed.GetPhrases()
+    macros = json_ed.GetMacros()
 
     silence_start = time.time()
     speaking = False
@@ -75,7 +77,11 @@ def tray_app():
     start_action = QAction("Start Listening")
     stop_action = QAction("Stop Listening")
     exit_action = QAction("Exit")
+    window_action = QAction("Open Window")
 
+    w = MainWindow()
+
+    menu.addAction(window_action)
     menu.addAction(start_action)
     menu.addAction(stop_action)
     menu.addSeparator()
@@ -83,11 +89,13 @@ def tray_app():
 
     tray.setContextMenu(menu)
     tray.menu = menu
-    tray.actions = (start_action, stop_action, exit_action)
+    tray.actions = (window_action, start_action, stop_action, exit_action)
 
 
+    tray.window = w
 
 
+    window_action.triggered.connect(w.show)
     exit_action.triggered.connect(app.quit)
 
     return app, tray

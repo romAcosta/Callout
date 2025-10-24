@@ -36,7 +36,7 @@ if __name__ == "__main__":
     timer = QTimer()
     timer.timeout.connect(poll_results)
     timer.start(100)
-
+    app.setStyle("Fusion")
     app.exec()
     control_q.put("stop")
     recognizer_process.join()

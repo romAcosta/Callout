@@ -1,6 +1,6 @@
 from pynput.keyboard import Key, Controller
 
-from backend.macros import GetMacros
+
 
 keyboard = Controller()
 
