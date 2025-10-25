@@ -58,3 +58,5 @@ class JSON_Editor:
         return data["phrases"]
 
 
+# j = JSON_Editor("../resources/default_profile.json")
+# j.SaveMacro(Macro("Open",MacroType.KEYBOARD,"L"))

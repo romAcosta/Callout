@@ -8,7 +8,7 @@ from PyQt6.QtGui import QIcon, QAction, QCursor
 import vosk
 import sounddevice as sd
 import time
-
+import queue
 from backend.macro_executor import execute_macro
 from backend.macro_json_editor import  JSON_Editor
 from gui.main_window import MainWindow
@@ -43,33 +43,51 @@ def run_recognizer(control_q, result_q):
     threshold = 500
 
     rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
-
+    listening = True
     with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
                            channels=1, latency='low') as stream:
         while True:
-            if not control_q.empty() and control_q.get() == "stop":
-                break
 
-
+            try:
+                command = control_q.get_nowait()
+                if command == "exit":
+                    break
+                elif command == "start":
+                    listening = True
+                    print("Listening started")
+                elif command == "pause":
+                    listening = False
+                    print("Listening paused")
+                elif command == "get_state":
+                    result_q.put({"type": "state", "paused": not listening})
+                elif command == "exit":
+                    break
+            except queue.Empty:
+                pass
             data = stream.read(4000)[0]
             arr = np.frombuffer(data, np.int16)
-            level = np.max(np.abs(arr))  # absolute amplitude
+            level = np.max(np.abs(arr)) # absolute amplitude
 
-            if level > threshold: #Checks if amplitude is at speaking threshold
+            if listening:
 
-                rec.AcceptWaveform(bytes(data))
-                speaking = True
-                silence_start = time.time()
-            elif speaking and time.time() - silence_start > 0.2: #Forces a speach check after x amount of time passes
 
-                text = rec.FinalResult()
-                execute_macro(phrases, text, macros)
-                speaking = False
-                silence_start = time.time()
+                if level > threshold: #Checks if amplitude is at speaking threshold
 
-def tray_app():
+                    rec.AcceptWaveform(bytes(data))
+                    speaking = True
+                    silence_start = time.time()
+                elif speaking and time.time() - silence_start > 0.2: #Forces a speach check after x amount of time passes
+
+                    text = rec.FinalResult()
+                    execute_macro(phrases, text, macros)
+                    speaking = False
+                    silence_start = time.time()
+            else:
+                time.sleep(0.05)
+
+def tray_app(control_q, result_q):
     app = QApplication(sys.argv)
-    tray = QSystemTrayIcon(QIcon("assets/icon.png"))
+    tray = QSystemTrayIcon(QIcon("assets/icon-on.png"))
     tray.setToolTip("Callout Backend")
     tray.show()
 
@@ -79,7 +97,7 @@ def tray_app():
     exit_action = QAction("Exit")
     window_action = QAction("Open Window")
 
-    w = MainWindow()
+    w = MainWindow(control_q, result_q)
 
     menu.addAction(window_action)
     menu.addAction(start_action)
@@ -96,7 +114,14 @@ def tray_app():
 
 
     window_action.triggered.connect(w.show)
-    exit_action.triggered.connect(app.quit)
+    start_action.triggered.connect(lambda : control_q.put("start"))
+    stop_action.triggered.connect(lambda : control_q.put("pause"))
+    exit_action.triggered.connect(lambda : exit_recognizer(control_q,app,tray))
 
     return app, tray
 
+def exit_recognizer(control_q, app, tray):
+    print("Exiting...")
+    tray.hide()
+    control_q.put("exit")
+    app.quit()
