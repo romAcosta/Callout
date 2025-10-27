@@ -14,12 +14,11 @@ class EditableLabel(QWidget):
 
         if text is None:
             self.label = QLabel("Click Edit to change me")
-            self.toggle_button = QPushButton("Edit")
+
         else:
             self.label = QLabel(text)
-            self.toggle_button = QPushButton(text)
 
-
+        self.toggle_button = QPushButton("Edit")
         self.label.setMaximumSize(300, 40)
         self.edit = QLineEdit(self.label.text())
         self.edit.setFixedSize(100,30)

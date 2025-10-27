@@ -14,27 +14,13 @@ from backend.macro_json_editor import  JSON_Editor
 from gui.main_window import MainWindow
 
 
-# path = os.path.abspath("../models/vosk-model-small-en-us-0.15")
-# model = vosk.Model(path)
-# rec = vosk.KaldiRecognizer(model, 16000,json.dumps(["open browser", "close window", "reload"]))
-# rec.SetWords(['reload','next','hello'])
-# with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16', channels=1) as stream:
-#     while True:
-#         data = stream.read(4000)[0]
-#         if rec.AcceptWaveform(bytes(data)):
-#             print(rec.Result())
-#
-#         execute_macro(rec.Result())
-
-
-
-
 def run_recognizer(control_q, result_q):
     path = os.path.abspath("models/vosk-model-small-en-us-0.15")
     model = vosk.Model(path)
 
     #load macros and phrases from json
     json_ed = JSON_Editor("resources/default_profile.json")
+
     phrases = json_ed.GetPhrases()
     macros = json_ed.GetMacros()
 
@@ -44,6 +30,7 @@ def run_recognizer(control_q, result_q):
 
     rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
     listening = True
+    editing = False
     with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
                            channels=1, latency='low') as stream:
         while True:
@@ -58,6 +45,15 @@ def run_recognizer(control_q, result_q):
                 elif command == "pause":
                     listening = False
                     print("Listening paused")
+                elif command == "edit":
+                    editing = True
+                    print("Editing Started")
+                elif command == "save":
+                    editing = False
+                    phrases = json_ed.GetPhrases()
+                    macros = json_ed.GetMacros()
+                    rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
+                    print("Editing Saved")
                 elif command == "get_state":
                     result_q.put({"type": "state", "paused": not listening})
                 elif command == "exit":
@@ -68,7 +64,7 @@ def run_recognizer(control_q, result_q):
             arr = np.frombuffer(data, np.int16)
             level = np.max(np.abs(arr)) # absolute amplitude
 
-            if listening:
+            if listening and not editing:
 
 
                 if level > threshold: #Checks if amplitude is at speaking threshold
