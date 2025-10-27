@@ -34,6 +34,14 @@ class JSON_Editor:
         with open(self.path, "w") as f:
             json.dump(data, f, indent=4)
 
+    def SaveMacros(self, macros):
+        with open(self.path, "r") as f:
+            data = json.load(f)
+        data["macros"] = macros
+        data["phrases"] = self.SavePhrases(data["macros"])
+        with open(self.path, "w") as f:
+            json.dump(data, f, indent=4)
+
     def RemoveMacro(self, index:int):
 
         with open(self.path, "r") as f:

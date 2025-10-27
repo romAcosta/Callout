@@ -47,12 +47,13 @@ def run_recognizer(control_q, result_q):
                     print("Listening paused")
                 elif command == "edit":
                     editing = True
+
                     print("Editing Started")
                 elif command == "save":
                     editing = False
                     phrases = json_ed.GetPhrases()
                     macros = json_ed.GetMacros()
-                    rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
+                    rec.SetGrammar(json.dumps(phrases))
                     print("Editing Saved")
                 elif command == "get_state":
                     result_q.put({"type": "state", "paused": not listening})
@@ -60,6 +61,8 @@ def run_recognizer(control_q, result_q):
                     break
             except queue.Empty:
                 pass
+
+
             data = stream.read(4000)[0]
             arr = np.frombuffer(data, np.int16)
             level = np.max(np.abs(arr)) # absolute amplitude

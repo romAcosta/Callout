@@ -1,12 +1,36 @@
 {
     "phrases": [
-        "okay"
+        "ultimate",
+        "queue",
+        "flash",
+        "shield",
+        "flag"
     ],
     "macros": [
         {
-            "phrase": "okay",
+            "phrase": "ultimate",
             "type": 1,
-            "command": "9"
+            "command": "r"
+        },
+        {
+            "phrase": "queue",
+            "type": 1,
+            "command": "q"
+        },
+        {
+            "phrase": "flash",
+            "type": 1,
+            "command": "f"
+        },
+        {
+            "phrase": "shield",
+            "type": 1,
+            "command": "w"
+        },
+        {
+            "phrase": "flag",
+            "type": 1,
+            "command": "e"
         }
     ]
 }

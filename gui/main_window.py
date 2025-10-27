@@ -2,7 +2,9 @@
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import *
 import sys
-from gui.ui_compenents import EditableLabel, MacroUI, MacroMenu
+
+from backend.macro_json_editor import Macro, MacroType, JSON_Editor
+from gui.ui_compenents import MacroUI, MacroMenu
 
 
 class MainWindow(QMainWindow ):
@@ -61,15 +63,34 @@ class MainWindow(QMainWindow ):
 
     def enable_macro_menu(self, checked):
         if(checked):
+            self.control_q.put("edit")
             self.enable_button.setText("Save")
             self.menu.setEnabled(True)
         else:
+            self.save_macros()
+
             self.enable_button.setText("Edit")
             self.menu.setEnabled(False)
 
+            self.control_q.put("save")
+
+
+
+    def save_macros(self):
+        macros = []
+        for i in range(self.menu.layout.count()):
+            item = self.menu.layout.itemAt(i)
+            widget = item.widget()
+            if widget and hasattr(widget, "edit_box") and hasattr(widget, "macro_button"):
+                phrase = widget.edit_box.text()
+                command = widget.macro_button.text()
+                macros.append(Macro(phrase,MacroType.KEYBOARD,command).to_dict())
+        j = JSON_Editor("resources/default_profile.json")
+        j.SaveMacros(macros)
+
+        print(macros)
 
     def the_button_was_toggled(self, checked):
-        print("Checked?", checked)
         if(checked):
             self.control_q.put("pause")
             self.button.setText("Start")

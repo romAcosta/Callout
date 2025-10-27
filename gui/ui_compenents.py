@@ -1,59 +1,20 @@
 from symtable import Class
 
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import *
 
 from backend.macro_json_editor import  JSON_Editor
 
 
-class EditableLabel(QWidget):
-    def __init__(self, text:str = None):
-        super().__init__()
 
-        self.layout = QHBoxLayout(self)
 
-        if text is None:
-            self.label = QLabel("Click Edit to change me")
 
-        else:
-            self.label = QLabel(text)
-
-        self.toggle_button = QPushButton("Edit")
-        self.label.setMaximumSize(300, 40)
-        self.edit = QLineEdit(self.label.text())
-        self.edit.setFixedSize(100,30)
-        self.edit.hide()
-
-        self.toggle_button.setFixedSize(30,30)
-        self.toggle_button.clicked.connect(self.toggle_mode)
-
-        self.layout.addWidget(self.toggle_button)
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.edit)
-        self.layout.setSizeConstraint(self.layout.SizeConstraint.SetFixedSize)
-
-        self.edit.returnPressed.connect(self.commit_text)
-
-    def toggle_mode(self):
-        if self.label.isVisible():
-            self.label.hide()
-            self.edit.show()
-            self.edit.setText(self.label.text())
-            self.toggle_button.setText("Save")
-            self.edit.setFocus()
-        else:
-            self.commit_text()
-
-    def commit_text(self):
-        self.label.setText(self.edit.text())
-        self.edit.hide()
-        self.label.show()
-        self.toggle_button.setText("Edit")
 
 class MacroUI(QWidget):
     def __init__(self, phrase = None, command = None):
         super().__init__()
-
+        self.listening = False
         self.main_layout = QVBoxLayout(self)
 
 
@@ -71,6 +32,9 @@ class MacroUI(QWidget):
         #macro button
         self.macro_button = QPushButton()
         self.macro_button.setFixedSize(50, 30)
+        self.macro_button.setCheckable(True)
+
+        self.macro_button.clicked.connect(self.listen_macro)
 
         editable_label_text = None
         if phrase is not None and command is not None:
@@ -78,7 +42,9 @@ class MacroUI(QWidget):
             self.macro_button.setText(command)
 
         self.layout = QHBoxLayout(self)
-        self.editableLabel = EditableLabel(editable_label_text)
+        self.edit_box = QLineEdit(editable_label_text)
+        self.edit_box.setFixedSize(100, 30)
+
         self.text = QLabel("->")
         self.text.setFixedSize(40, 30)
 
@@ -97,7 +63,7 @@ class MacroUI(QWidget):
 
 
         self.inner_layout = QHBoxLayout(self.inner_widget)
-        self.inner_layout.addWidget(self.editableLabel)
+        self.inner_layout.addWidget(self.edit_box)
         self.inner_layout.addWidget(self.text)
         self.inner_layout.addWidget(self.macro_button)
         self.inner_layout.addWidget(self.delete_button)
@@ -106,13 +72,42 @@ class MacroUI(QWidget):
 
         self.main_layout.addWidget(self.inner_widget)
 
+    def listen_macro(self,checked):
+        if checked:
+            self.listening = True
+            self.macro_button.setEnabled(False)
+            self.setFocus()
+            print("UI: Listening for a key press...")
+
+    def keyPressEvent(self, event):
+        if self.listening:
+            key_name = QKeySequence(event.key()).toString()
+            print(f"Key pressed: {key_name}")
+            self.stop_listening(key_name.lower())
+
+    #TODO Get mouse working
+
+    # def mousePressEvent(self, event):
+    #     if self.listening:
+    #         button_map = {
+    #             Qt.MouseButton.LeftButton: "Left Click",
+    #             Qt.MouseButton.RightButton: "Right Click",
+    #             Qt.MouseButton.MiddleButton: "Middle Click",
+    #         }
+    #         btn_name = button_map.get(event.button(), "Other Button")
+    #         print(f"Mouse pressed: {btn_name}")
+    #         self.stop_listening(f"Mouse: {btn_name}")
+
+    def stop_listening(self, text):
+        self.listening = False
+        self.macro_button.setEnabled(True)
+        self.macro_button.setChecked(False)
+        self.macro_button.setText(text)
+
+
     def delete_self(self):
 
         parent_layout = self.parentWidget().layout()
-
-        index = self.parentWidget().layout().indexOf(self)
-        json_ed = JSON_Editor("resources/default_profile.json")
-        json_ed.RemoveMacro(index)
 
         if parent_layout:
             parent_layout.removeWidget(self)
