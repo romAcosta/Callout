@@ -1,6 +1,6 @@
 from symtable import Class
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import *
 
@@ -139,12 +139,14 @@ class MacroMenu(QWidget):
         self.main_layout.addWidget(self.button)
 
         self.layout.addStretch()
+        self.load_menu()
 
-        #import and add macros to UI
-        json_ed = JSON_Editor("resources/default_profile.json")
+    def load_menu(self):
+        # import and add macros to UI
+        json_ed = JSON_Editor("resources/profiles")
         macros = json_ed.GetMacros()
         for macro in macros:
-            self.new_label = MacroUI(macro["phrase"],macro["command"])
+            self.new_label = MacroUI(macro["phrase"], macro["command"])
             self.layout.insertWidget(self.layout.count() - 1, self.new_label)
 
     def add_widgets(self): # Creates a Widget within the Scroll Area
@@ -152,3 +154,18 @@ class MacroMenu(QWidget):
         self.layout.insertWidget(self.layout.count() - 1, self.new_label)
 
 
+
+class ProfileDropdown(QComboBox):
+    def __init__(self, json_ed):
+        super().__init__()
+        self.json_ed = json_ed
+
+
+
+    def load_profiles(self):
+        self.clear()
+        profiles = self.json_ed.GetProfiles()
+        for profile in profiles:
+            p = profile.replace('_', ' ')
+
+            self.addItem(p.replace('.json', ''))

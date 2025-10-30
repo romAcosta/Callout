@@ -1,0 +1,37 @@
+﻿{
+    "profile_name": "Test 2",
+    "phrases": [
+        "r",
+        "q",
+        "f",
+        "w",
+        "ee"
+    ],
+    "macros": [
+        {
+            "phrase": "r",
+            "type": 1,
+            "command": "r"
+        },
+        {
+            "phrase": "q",
+            "type": 1,
+            "command": "q"
+        },
+        {
+            "phrase": "f",
+            "type": 1,
+            "command": "f"
+        },
+        {
+            "phrase": "w",
+            "type": 1,
+            "command": "w"
+        },
+        {
+            "phrase": "ee",
+            "type": 1,
+            "command": "e"
+        }
+    ]
+}

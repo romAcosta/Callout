@@ -2,11 +2,13 @@
 
 from PyQt6.QtCore import QTimer
 
-from backend.recognizer import run_recognizer, tray_app
-
+from backend.macro_json_editor import JSON_Editor
+from backend.recognizer import run_recognizer
+from gui.tray_app import tray_app
 
 if __name__ == "__main__":
     control_q, result_q = Queue(), Queue()
+
     recognizer_process = Process(target=run_recognizer, args=(control_q, result_q))
     recognizer_process.start()
 
@@ -23,5 +25,6 @@ if __name__ == "__main__":
     timer.start(100)
     app.setStyle("Fusion")
     app.exec()
+
     control_q.put("stop")
     recognizer_process.join()

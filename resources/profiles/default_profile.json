@@ -1,34 +1,35 @@
 {
+    "profile_name": "Default",
     "phrases": [
-        "ultimate",
-        "queue",
-        "flash",
-        "shield",
-        "flag"
+        "r",
+        "q",
+        "f",
+        "w",
+        "ee"
     ],
     "macros": [
         {
-            "phrase": "ultimate",
+            "phrase": "r",
             "type": 1,
             "command": "r"
         },
         {
-            "phrase": "queue",
+            "phrase": "q",
             "type": 1,
             "command": "q"
         },
         {
-            "phrase": "flash",
+            "phrase": "f",
             "type": 1,
             "command": "f"
         },
         {
-            "phrase": "shield",
+            "phrase": "w",
             "type": 1,
             "command": "w"
         },
         {
-            "phrase": "flag",
+            "phrase": "ee",
             "type": 1,
             "command": "e"
         }

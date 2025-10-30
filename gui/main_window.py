@@ -4,22 +4,26 @@ from PyQt6.QtWidgets import *
 import sys
 
 from backend.macro_json_editor import Macro, MacroType, JSON_Editor
-from gui.ui_compenents import MacroUI, MacroMenu
+from gui.ui_compenents import MacroUI, MacroMenu, ProfileDropdown
 
 
 class MainWindow(QMainWindow ):
     def __init__(self, control_q, result_q):
         super().__init__()
+        self.json_ed = JSON_Editor("resources/profiles")
 
         # Set Queues
         self.control_q = control_q
         self.result_q = result_q
         self.paused = False
 
+        edit_profile_layout = QHBoxLayout()
         layout = QVBoxLayout()
+
         self.setWindowTitle("Callout")
         self.setWindowIcon(QIcon("assets/icon.png"))
 
+        self.profile_dropdown = ProfileDropdown(self.json_ed)
 
         self.menu = MacroMenu()
         self.menu.setEnabled(False)
@@ -34,9 +38,11 @@ class MainWindow(QMainWindow ):
         self.button.setCheckable(True)
         self.button.setFixedSize(60, 40)
 
+        edit_profile_layout.addWidget(self.enable_button)
+        edit_profile_layout.addWidget(self.profile_dropdown)
 
         layout.addWidget(self.button)
-        layout.addWidget(self.enable_button)
+        layout.addLayout(edit_profile_layout)
         layout.addWidget(self.menu)
 
 
@@ -85,8 +91,8 @@ class MainWindow(QMainWindow ):
                 phrase = widget.edit_box.text()
                 command = widget.macro_button.text()
                 macros.append(Macro(phrase,MacroType.KEYBOARD,command).to_dict())
-        j = JSON_Editor("resources/default_profile.json")
-        j.SaveMacros(macros)
+
+        self.json_ed.SaveMacros(macros)
 
         print(macros)
 
@@ -120,6 +126,7 @@ class MainWindow(QMainWindow ):
 
     def showEvent(self, event):
         super().showEvent(event)
+        self.profile_dropdown.load_profiles()
         self.control_q.put("get_state")
         if not self.timer.isActive():
             self.timer.start(50)

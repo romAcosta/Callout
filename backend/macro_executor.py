@@ -16,11 +16,11 @@ def execute_macro(phrases,command:str,macros):
     print(match)
     if match:
         for macro in macros:
-            if match.__eq__(macro["phrase"]) and is_valid_key(macro["command"]):
+
+           if match.__eq__(macro["phrase"]) and is_valid_key(macro["command"]):
 
                 keyboard.press(macro["command"])
                 keyboard.release(macro["command"])
-
 
     return
 
