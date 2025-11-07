@@ -8,7 +8,7 @@ import sounddevice as sd
 import time
 import queue
 from backend.macro_executor import execute_macro
-from backend.macro_json_editor import  JSON_Editor
+from backend.macro_json_editor import  JsonEditor
 
 
 
@@ -17,10 +17,10 @@ def run_recognizer(control_q, result_q):
     model = vosk.Model(path)
 
     #load macros and phrases from json
-    json_ed = JSON_Editor("resources/profiles")
+    json_ed = JsonEditor("resources/profiles")
 
-    phrases = json_ed.GetPhrases()
-    macros = json_ed.GetMacros()
+    phrases = json_ed.get_phrases()
+    macros = json_ed.get_macros()
 
     silence_start = time.time()
     speaking = False
@@ -49,8 +49,8 @@ def run_recognizer(control_q, result_q):
                     print("Editing Started")
                 elif command == "save":
                     editing = False
-                    phrases = json_ed.GetPhrases()
-                    macros = json_ed.GetMacros()
+                    phrases = json_ed.get_phrases()
+                    macros = json_ed.get_macros()
                     rec.SetGrammar(json.dumps(phrases))
                     print("Editing Saved")
                 elif command == "get_state":

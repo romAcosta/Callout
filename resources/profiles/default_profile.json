@@ -1,37 +1,19 @@
 {
     "profile_name": "Default",
     "phrases": [
-        "r",
-        "q",
-        "f",
-        "w",
-        "ee"
+        "hello",
+        "dude"
     ],
     "macros": [
         {
-            "phrase": "r",
-            "type": 1,
-            "command": "r"
-        },
-        {
-            "phrase": "q",
+            "phrase": "hello",
             "type": 1,
             "command": "q"
         },
         {
-            "phrase": "f",
-            "type": 1,
-            "command": "f"
-        },
-        {
-            "phrase": "w",
+            "phrase": "dude",
             "type": 1,
             "command": "w"
-        },
-        {
-            "phrase": "ee",
-            "type": 1,
-            "command": "e"
         }
     ]
 }

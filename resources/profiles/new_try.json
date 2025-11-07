@@ -9,12 +9,12 @@
     ],
     "macros": [
         {
-            "phrase": "r",
+            "phrase": "milk",
             "type": 1,
             "command": "r"
         },
         {
-            "phrase": "q",
+            "phrase": "toast",
             "type": 1,
             "command": "q"
         },

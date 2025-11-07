@@ -2,7 +2,7 @@
 
 from PyQt6.QtCore import QTimer
 
-from backend.macro_json_editor import JSON_Editor
+from backend.macro_json_editor import JsonEditor
 from backend.recognizer import run_recognizer
 from gui.tray_app import tray_app
 

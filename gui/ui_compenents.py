@@ -1,14 +1,26 @@
+import time
 from symtable import Class
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import *
 
-from backend.macro_json_editor import  JSON_Editor
+from backend.macro_json_editor import  JsonEditor
 
 
 
+def clear_layout(layout):
+    if layout is None:
+        return
+    while layout.count():
+        item = layout.takeAt(0)
+        widget = item.widget()
 
+        if widget is not None:
+            widget.setParent(None)
+            widget.deleteLater()
+        elif item.layout() is not None:
+            clear_layout(item.layout())
 
 
 class MacroUI(QWidget):
@@ -117,8 +129,9 @@ class MacroUI(QWidget):
 
 
 class MacroMenu(QWidget):
-    def __init__(self):
+    def __init__(self, json_ed: JsonEditor):
         super().__init__()
+        self.json_ed = json_ed
         self.main_layout = QVBoxLayout(self)
         self.content = QWidget()
 
@@ -138,16 +151,33 @@ class MacroMenu(QWidget):
         self.main_layout.addWidget(self.scroll)
         self.main_layout.addWidget(self.button)
 
-        self.layout.addStretch()
+
         self.load_menu()
 
-    def load_menu(self):
+    def load_menu(self, new_profile:str = None):
         # import and add macros to UI
-        json_ed = JSON_Editor("resources/profiles")
-        macros = json_ed.GetMacros()
+        print("(DEBUG) Loading Menu...")
+
+        clear_layout(self.layout)
+        self.layout.addStretch()
+
+        with self.json_ed.lock:
+            if new_profile is not None:
+                self.json_ed.set_profile(new_profile + ".json")
+                time.sleep(0.1)
+
+            print("(DEBUG) Loading Macros...")
+
+            macros = self.json_ed.get_macros()
+        self.layout.update()
+        self.repaint()
+        print("(DEBUG) Macros Loaded!")
+
         for macro in macros:
             self.new_label = MacroUI(macro["phrase"], macro["command"])
             self.layout.insertWidget(self.layout.count() - 1, self.new_label)
+
+        print("(DEBUG) Menu Loaded!")
 
     def add_widgets(self): # Creates a Widget within the Scroll Area
         self.new_label = MacroUI()
@@ -156,16 +186,24 @@ class MacroMenu(QWidget):
 
 
 class ProfileDropdown(QComboBox):
-    def __init__(self, json_ed):
+    def __init__(self, json_ed: JsonEditor, macro_menu: MacroMenu):
         super().__init__()
+        self.macro_menu = macro_menu
         self.json_ed = json_ed
+        self.currentTextChanged.connect(self.load_macros)
 
 
 
     def load_profiles(self):
         self.clear()
-        profiles = self.json_ed.GetProfiles()
+        profiles = self.json_ed.get_profiles()
         for profile in profiles:
-            p = profile.replace('_', ' ')
+            p = profile
 
             self.addItem(p.replace('.json', ''))
+
+    def load_macros(self, text):
+
+        self.macro_menu.load_menu(text)
+
+

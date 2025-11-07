@@ -1,9 +1,11 @@
 ﻿import os
 import threading
+import time
 from enum import Enum
 import json
 from pathlib import Path
 
+import portalocker
 from PyQt6.QtCore import QTimer
 
 
@@ -22,88 +24,86 @@ class Macro:
         return {"phrase": self.phrase, "type": self.type.value, "command": self.command}
 
 
-class JSON_Editor:
+class JsonEditor:
     def __init__(self, path):
         super().__init__()
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
         self.current_profile = "default_profile.json"
         self.path = path
 
-    def GetProfileName(self,profile:str = None):
-        data = self.LoadProfile(profile)
-        return data["profile_name"]
 
-    def GetProfiles(self):
+    def get_profiles(self):
         folder = Path(self.path)
         files = [f.name for f in folder.iterdir() if f.is_file()]
         print(files)
         return files
 
-    def SetProfile(self,profile):
+    def set_profile(self, profile):
         self.current_profile = profile
 
-    def LoadProfile(self, profile:str = None ):
-        current_path = self.path + "/"
-        if profile is not None:
-            current_path += profile
-        else:
-            current_path += self.current_profile
+    def load_profile(self,retries=3):
+        current_path = self.path + "/" + self.current_profile
+        os.makedirs(os.path.dirname(current_path), exist_ok=True)
 
-        with self.lock:
-            if not os.path.exists(current_path) or os.path.getsize(current_path) == 0:
-                return {}
-            with open(current_path, "r") as f:
-                return json.load(f)
+        print(current_path)
+        for _ in range(retries):
+            try:
+                with portalocker.Lock(current_path, 'r', timeout=2) as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                time.sleep(0.05)
+        raise
 
 
 
-    def SaveProfile(self,data):
+    def save_profile(self, data):
         path = os.path.join(self.path, self.current_profile)
 
         with self.lock:
-            with open(path, "w") as f:
+            with portalocker.Lock(path, "w") as f:
                 json.dump(data, f, indent=4)
 
-    def SavePhrases(self,macros):
+    @staticmethod
+    def save_phrases(macros):
         phrases = []
         for macro in macros:
             phrases.append(macro["phrase"])
         return phrases
 
-    def SaveMacro(self, macro:Macro):
-        data = self.LoadProfile()
+    def save_macro(self, macro:Macro):
+        data = self.load_profile()
         data["macros"].append(macro.to_dict())
-        data["phrases"] = self.SavePhrases(data["macros"])
-        self.SaveProfile(data)
+        data["phrases"] = self.save_phrases(data["macros"])
+        self.save_profile(data)
 
-    def SaveMacros(self, macros):
-        data = self.LoadProfile()
+    def save_macros(self, macros):
+        data = self.load_profile()
         data["macros"] = macros
-        data["phrases"] = self.SavePhrases(data["macros"])
-        self.SaveProfile(data)
+        data["phrases"] = self.save_phrases(data["macros"])
+        self.save_profile(data)
 
-    def RemoveMacro(self, index:int):
+    def remove_macro(self, index:int):
 
-        data = self.LoadProfile()
+        data = self.load_profile()
 
         if not (0 <= index < len(data["macros"])):
             return
 
         data["macros"].pop(index)
-        data["phrases"] = self.SavePhrases(data["macros"])
+        data["phrases"] = self.save_phrases(data["macros"])
 
-        self.SaveProfile(data)
+        self.save_profile(data)
 
-    def GetMacros(self):
-        data = self.LoadProfile()
+    def get_macros(self):
+        data = self.load_profile()
         return data["macros"]
 
-    def GetPhrases(self):
-        data = self.LoadProfile()
+    def get_phrases(self):
+        data = self.load_profile()
         return data["phrases"]
 
 
 
 # j = JSON_Editor("../resources/profiles")
 # print(j.GetProfileName("default_profile.json"))
-# j.SaveMacro(Macro("Open",MacroType.KEYBOARD,"L"))
+# j.SaveMacro(Macro("portalocker.Lock",MacroType.KEYBOARD,"L"))
