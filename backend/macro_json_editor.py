@@ -1,11 +1,13 @@
 ﻿import os
 import threading
 import time
+
 from enum import Enum
 import json
 from pathlib import Path
 
 import portalocker
+import sqlite3
 from PyQt6.QtCore import QTimer
 
 
@@ -23,6 +25,46 @@ class Macro:
     def to_dict(self):
         return {"phrase": self.phrase, "type": self.type.value, "command": self.command}
 
+
+class DatabaseEditor:
+    def __init__(self, db_path="resources/callout.db"):
+        self.db_path = db_path
+
+    def connect(self):
+        return sqlite3.connect(self.db_path)
+
+    def get_profiles(self):
+        with self.connect() as conn:
+            return [row[0] for row in conn.execute("SELECT name FROM profiles")]
+
+    def add_profile(self, name):
+        with self.connect() as conn:
+            conn.execute("INSERT OR IGNORE INTO profiles (name) VALUES (?)", (name,))
+            conn.commit()
+
+    def get_macros(self, profile_name):
+        with self.connect() as conn:
+            cur = conn.execute("""
+                SELECT phrase, command, type
+                FROM macros
+                JOIN profiles ON macros.profile_id = profiles.id
+                WHERE profiles.name = ?
+            """, (profile_name,))
+            return [{"phrase": r[0], "command": r[1], "type": r[2]} for r in cur]
+
+    def save_macros(self, profile_name, macros):
+        with self.connect() as conn:
+            pid = conn.execute("SELECT id FROM profiles WHERE name = ?", (profile_name,)).fetchone()
+            if pid is None:
+                conn.execute("INSERT INTO profiles (name) VALUES (?)", (profile_name,))
+                pid = conn.execute("SELECT id FROM profiles WHERE name = ?", (profile_name,)).fetchone()
+            pid = pid[0]
+            conn.execute("DELETE FROM macros WHERE profile_id = ?", (pid,))
+            conn.executemany("""
+                INSERT INTO macros (profile_id, phrase, command, type)
+                VALUES (?, ?, ?, ?)
+            """, [(pid, m["phrase"], m["command"], m.get("type", "KEYBOARD")) for m in macros])
+            conn.commit()
 
 class JsonEditor:
     def __init__(self, path):
@@ -102,6 +144,29 @@ class JsonEditor:
         data = self.load_profile()
         return data["phrases"]
 
+conn = sqlite3.connect("../resources/callout.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS profiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+)
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS macros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile_id INTEGER,
+    phrase TEXT NOT NULL,
+    command TEXT NOT NULL,
+    type TEXT,
+    FOREIGN KEY(profile_id) REFERENCES profiles(id)
+)
+""")
+
+conn.commit()
+conn.close()
 
 
 # j = JSON_Editor("../resources/profiles")
