@@ -3,14 +3,14 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import *
 import sys
 
-from backend.macro_json_editor import Macro, MacroType, JsonEditor
+from backend.macro_json_editor import Macro, MacroType, JsonEditor, DatabaseEditor
 from gui.ui_compenents import MacroUI, MacroMenu, ProfileDropdown
 
 
 class MainWindow(QMainWindow ):
     def __init__(self, control_q, result_q):
         super().__init__()
-        self.json_ed = JsonEditor("resources/profiles")
+        self.db_editor = DatabaseEditor()
 
         # Set Queues
         self.control_q = control_q
@@ -23,9 +23,9 @@ class MainWindow(QMainWindow ):
         self.setWindowTitle("Callout")
         self.setWindowIcon(QIcon("assets/icon.png"))
 
-        self.menu = MacroMenu(self.json_ed)
+        self.menu = MacroMenu(self.db_editor)
         self.menu.setEnabled(False)
-        self.profile_dropdown = ProfileDropdown(self.json_ed,self.menu)
+        self.profile_dropdown = ProfileDropdown(self.db_editor, self.menu)
 
 
 
@@ -92,7 +92,7 @@ class MainWindow(QMainWindow ):
                 command = widget.macro_button.text()
                 macros.append(Macro(phrase,MacroType.KEYBOARD,command).to_dict())
 
-        self.json_ed.save_macros(macros)
+        self.db_editor.save_macros("default",macros)
 
         print(macros)
 

@@ -52,6 +52,13 @@ class DatabaseEditor:
             """, (profile_name,))
             return [{"phrase": r[0], "command": r[1], "type": r[2]} for r in cur]
 
+    def get_phrases(self, macros):
+        phrase_list = []
+        for macro in macros:
+            phrase_list.append(macro["phrase"])
+        return phrase_list
+
+
     def save_macros(self, profile_name, macros):
         with self.connect() as conn:
             pid = conn.execute("SELECT id FROM profiles WHERE name = ?", (profile_name,)).fetchone()
@@ -144,29 +151,35 @@ class JsonEditor:
         data = self.load_profile()
         return data["phrases"]
 
-conn = sqlite3.connect("../resources/callout.db")
-cursor = conn.cursor()
+# conn = sqlite3.connect("../resources/callout.db")
+# cursor = conn.cursor()
+#
+# cursor.execute("""
+# CREATE TABLE IF NOT EXISTS profiles (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     name TEXT UNIQUE NOT NULL
+# )
+# """)
+#
+# cursor.execute("""
+# CREATE TABLE IF NOT EXISTS macros (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     profile_id INTEGER,
+#     phrase TEXT NOT NULL,
+#     command TEXT NOT NULL,
+#     type TEXT,
+#     FOREIGN KEY(profile_id) REFERENCES profiles(id)
+# )
+# """)
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS profiles (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL
-)
-""")
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS macros (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    profile_id INTEGER,
-    phrase TEXT NOT NULL,
-    command TEXT NOT NULL,
-    type TEXT,
-    FOREIGN KEY(profile_id) REFERENCES profiles(id)
-)
-""")
-
-conn.commit()
-conn.close()
+# db = DatabaseEditor()
+# # db.add_profile("default")
+#
+#
+# print(db.get_macros("default"))
+#
+# conn.commit()
+# conn.close()
 
 
 # j = JSON_Editor("../resources/profiles")

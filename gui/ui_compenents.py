@@ -5,8 +5,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import *
 
-from backend.macro_json_editor import  JsonEditor
-
+from backend.macro_json_editor import JsonEditor, DatabaseEditor
 
 
 def clear_layout(layout):
@@ -129,9 +128,9 @@ class MacroUI(QWidget):
 
 
 class MacroMenu(QWidget):
-    def __init__(self, json_ed: JsonEditor):
+    def __init__(self, db_editor: DatabaseEditor):
         super().__init__()
-        self.json_ed = json_ed
+        self.db_editor = db_editor
         self.main_layout = QVBoxLayout(self)
         self.content = QWidget()
 
@@ -161,21 +160,23 @@ class MacroMenu(QWidget):
         clear_layout(self.layout)
         self.layout.addStretch()
 
-        with self.json_ed.lock:
-            if new_profile is not None:
-                self.json_ed.set_profile(new_profile + ".json")
-                time.sleep(0.1)
 
-            print("(DEBUG) Loading Macros...")
+        if new_profile is not None:
+            # self.json_ed.set_profile(new_profile + ".json")
+            time.sleep(0.1)
 
-            macros = self.json_ed.get_macros()
-        self.layout.update()
-        self.repaint()
+        print("(DEBUG) Loading Macros...")
+
+        macros = self.db_editor.get_macros("default")
+
         print("(DEBUG) Macros Loaded!")
 
         for macro in macros:
             self.new_label = MacroUI(macro["phrase"], macro["command"])
             self.layout.insertWidget(self.layout.count() - 1, self.new_label)
+
+        self.layout.update()
+        self.repaint()
 
         print("(DEBUG) Menu Loaded!")
 
@@ -186,17 +187,17 @@ class MacroMenu(QWidget):
 
 
 class ProfileDropdown(QComboBox):
-    def __init__(self, json_ed: JsonEditor, macro_menu: MacroMenu):
+    def __init__(self, db_editor: DatabaseEditor, macro_menu: MacroMenu):
         super().__init__()
         self.macro_menu = macro_menu
-        self.json_ed = json_ed
+        self.db_editor = db_editor
         self.currentTextChanged.connect(self.load_macros)
 
 
 
     def load_profiles(self):
         self.clear()
-        profiles = self.json_ed.get_profiles()
+        profiles = self.db_editor.get_profiles()
         for profile in profiles:
             p = profile
 
