@@ -27,6 +27,8 @@ class Macro:
 
 
 class DatabaseEditor:
+    #TODO Add Profile Deleting
+
     def __init__(self, db_path="resources/callout.db"):
         self.db_path = db_path
 
@@ -74,10 +76,10 @@ class DatabaseEditor:
             conn.commit()
 
 class JsonEditor:
-    def __init__(self, path):
+    def __init__(self, path = "resources"):
         super().__init__()
         self.lock = threading.RLock()
-        self.current_profile = "default_profile.json"
+
         self.path = path
 
 
@@ -88,68 +90,22 @@ class JsonEditor:
         return files
 
     def set_profile(self, profile):
-        self.current_profile = profile
+        with open(self.path + "/settings.json", 'r') as f:
+            data = json.load(f)
+        data["current_profile"] = profile
+        with open(self.path + "/settings.json", 'w') as f:
+            json.dump(data,f,indent = 4)
 
-    def load_profile(self,retries=3):
-        current_path = self.path + "/" + self.current_profile
-        os.makedirs(os.path.dirname(current_path), exist_ok=True)
+    def get_settings(self):
+        with open(self.path + "/settings.json", 'r') as f:
+            return json.load(f)
 
-        print(current_path)
-        for _ in range(retries):
-            try:
-                with portalocker.Lock(current_path, 'r', timeout=2) as f:
-                    return json.load(f)
-            except json.JSONDecodeError:
-                time.sleep(0.05)
-        raise
+    def get_current_profile(self):
+        return self.get_settings()["current_profile"]
 
 
 
-    def save_profile(self, data):
-        path = os.path.join(self.path, self.current_profile)
 
-        with self.lock:
-            with portalocker.Lock(path, "w") as f:
-                json.dump(data, f, indent=4)
-
-    @staticmethod
-    def save_phrases(macros):
-        phrases = []
-        for macro in macros:
-            phrases.append(macro["phrase"])
-        return phrases
-
-    def save_macro(self, macro:Macro):
-        data = self.load_profile()
-        data["macros"].append(macro.to_dict())
-        data["phrases"] = self.save_phrases(data["macros"])
-        self.save_profile(data)
-
-    def save_macros(self, macros):
-        data = self.load_profile()
-        data["macros"] = macros
-        data["phrases"] = self.save_phrases(data["macros"])
-        self.save_profile(data)
-
-    def remove_macro(self, index:int):
-
-        data = self.load_profile()
-
-        if not (0 <= index < len(data["macros"])):
-            return
-
-        data["macros"].pop(index)
-        data["phrases"] = self.save_phrases(data["macros"])
-
-        self.save_profile(data)
-
-    def get_macros(self):
-        data = self.load_profile()
-        return data["macros"]
-
-    def get_phrases(self):
-        data = self.load_profile()
-        return data["phrases"]
 
 # conn = sqlite3.connect("../resources/callout.db")
 # cursor = conn.cursor()
@@ -172,8 +128,7 @@ class JsonEditor:
 # )
 # """)
 
-# db = DatabaseEditor()
-# # db.add_profile("default")
+
 #
 #
 # print(db.get_macros("default"))
@@ -183,5 +138,5 @@ class JsonEditor:
 
 
 # j = JSON_Editor("../resources/profiles")
-# print(j.GetProfileName("default_profile.json"))
+# print(j.GetProfileName("settings.json"))
 # j.SaveMacro(Macro("portalocker.Lock",MacroType.KEYBOARD,"L"))

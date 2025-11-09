@@ -3,14 +3,17 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import *
 import sys
 
-from backend.macro_json_editor import Macro, MacroType, JsonEditor, DatabaseEditor
+from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor
+from gui.new_profile_menu import NewProfileMenu
 from gui.ui_compenents import MacroUI, MacroMenu, ProfileDropdown
 
 
 class MainWindow(QMainWindow ):
     def __init__(self, control_q, result_q):
         super().__init__()
+        self.w = None
         self.db_editor = DatabaseEditor()
+        self.json_editor = JsonEditor()
 
         # Set Queues
         self.control_q = control_q
@@ -23,16 +26,16 @@ class MainWindow(QMainWindow ):
         self.setWindowTitle("Callout")
         self.setWindowIcon(QIcon("assets/icon.png"))
 
-        self.menu = MacroMenu(self.db_editor)
+        self.menu = MacroMenu(self.db_editor, self.json_editor)
         self.menu.setEnabled(False)
-        self.profile_dropdown = ProfileDropdown(self.db_editor, self.menu)
-
-
+        self.profile_dropdown = ProfileDropdown(self.db_editor,self.json_editor, self.menu, self.profile_changed)
+        self.add_profile_button = QPushButton("Add Profile")
+        self.add_profile_button.setFixedSize(70, 25)
 
 
         self.enable_button = QPushButton("Edit")
         self.enable_button.setCheckable(True)
-        self.enable_button.setFixedSize(40, 20)
+        self.enable_button.setFixedSize(40, 25)
 
         self.button = QPushButton("Pause")
         self.button.setCheckable(True)
@@ -40,6 +43,8 @@ class MainWindow(QMainWindow ):
 
         edit_profile_layout.addWidget(self.enable_button)
         edit_profile_layout.addWidget(self.profile_dropdown)
+        edit_profile_layout.addWidget(self.add_profile_button)
+
 
         layout.addWidget(self.button)
         layout.addLayout(edit_profile_layout)
@@ -53,7 +58,7 @@ class MainWindow(QMainWindow ):
 
         self.button.toggled.connect(self.the_button_was_toggled)
         self.enable_button.toggled.connect(self.enable_macro_menu)
-
+        self.add_profile_button.clicked.connect(self.open_new_profile_menu)
 
         # Start timer to begin polling backend
         self.timer = QTimer()
@@ -65,7 +70,9 @@ class MainWindow(QMainWindow ):
         self.control_q.put("get_state")
 
 
-
+    def open_new_profile_menu(self):
+        self.w = NewProfileMenu(self.db_editor,self.profile_dropdown)
+        self.w.show()
 
     def enable_macro_menu(self, checked):
         if(checked):
@@ -80,9 +87,12 @@ class MainWindow(QMainWindow ):
 
             self.control_q.put("save")
 
-
+    def profile_changed(self):
+        print("(DEBUG) Profile Changed")
+        self.control_q.put("save")
 
     def save_macros(self):
+
         macros = []
         for i in range(self.menu.layout.count()):
             item = self.menu.layout.itemAt(i)
@@ -92,7 +102,7 @@ class MainWindow(QMainWindow ):
                 command = widget.macro_button.text()
                 macros.append(Macro(phrase,MacroType.KEYBOARD,command).to_dict())
 
-        self.db_editor.save_macros("default",macros)
+        self.db_editor.save_macros(self.json_editor.get_current_profile(),macros)
 
         print(macros)
 
@@ -121,7 +131,7 @@ class MainWindow(QMainWindow ):
 
     def closeEvent(self, event):
         event.ignore()
-        if self.enable_button.toggled:
+        if self.enable_button.isChecked():
             self.enable_button.toggle()
 
         self.hide()
@@ -129,7 +139,7 @@ class MainWindow(QMainWindow ):
 
     def showEvent(self, event):
         super().showEvent(event)
-        self.profile_dropdown.load_profiles()
+
         self.control_q.put("get_state")
         if not self.timer.isActive():
             self.timer.start(50)

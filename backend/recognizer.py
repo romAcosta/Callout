@@ -8,7 +8,7 @@ import sounddevice as sd
 import time
 import queue
 from backend.macro_executor import execute_macro
-from backend.macro_json_editor import JsonEditor, DatabaseEditor
+from backend.storage_management import JsonEditor, DatabaseEditor
 
 
 def run_recognizer(control_q, result_q):
@@ -17,15 +17,18 @@ def run_recognizer(control_q, result_q):
 
     #load macros and phrases from json
     db_editor = DatabaseEditor()
+    json_editor = JsonEditor()
 
-    macros = db_editor.get_macros("default")
+
+    macros = db_editor.get_macros(json_editor.get_current_profile())
     phrases = db_editor.get_phrases(macros)
 
     silence_start = time.time()
     speaking = False
     threshold = 500
 
-    rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
+    rec = vosk.KaldiRecognizer(model, 16000)
+    if phrases: rec.SetGrammar(json.dumps(phrases))
     listening = True
     editing = False
     with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
@@ -48,9 +51,9 @@ def run_recognizer(control_q, result_q):
                     print("Editing Started")
                 elif command == "save":
                     editing = False
-                    macros = db_editor.get_macros("default")
+                    macros = db_editor.get_macros(json_editor.get_current_profile())
                     phrases = db_editor.get_phrases(macros)
-                    rec.SetGrammar(json.dumps(phrases))
+                    if phrases: rec.SetGrammar(json.dumps(phrases))
                     print("Editing Saved")
                 elif command == "get_state":
                     result_q.put({"type": "state", "paused": not listening})
