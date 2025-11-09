@@ -31,7 +31,7 @@ class MainWindow(QMainWindow ):
         self.profile_dropdown = ProfileDropdown(self.db_editor,self.json_editor, self.menu, self.profile_changed)
         self.add_profile_button = QPushButton("Add Profile")
         self.add_profile_button.setFixedSize(70, 25)
-
+        self.menu.set_reset_method(self.profile_dropdown.load_profiles())
 
         self.enable_button = QPushButton("Edit")
         self.enable_button.setCheckable(True)
@@ -128,6 +128,10 @@ class MainWindow(QMainWindow ):
             else:
                 pass
 
+    def reload_window(self):
+        self.hide()
+        self.new_window = MainWindow(self.control_q,self.result_q)
+        self.new_window.show()
 
     def closeEvent(self, event):
         event.ignore()

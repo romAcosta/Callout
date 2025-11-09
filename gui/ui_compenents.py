@@ -128,9 +128,9 @@ class MacroUI(QWidget):
 
 
 class MacroMenu(QWidget):
-    def __init__(self, db_editor: DatabaseEditor, json_editor: JsonEditor):
+    def __init__(self, db_editor: DatabaseEditor, json_editor: JsonEditor, ):
         super().__init__()
-
+        self.reset_method = None
         self.db_editor = db_editor
         self.json_editor = json_editor
         self.main_layout = QVBoxLayout(self)
@@ -150,8 +150,14 @@ class MacroMenu(QWidget):
         self.button.clicked.connect(self.add_widgets)
         self.button.setMaximumWidth(400)
 
+        self.del_button = QPushButton("Delete Profile")
+        self.del_button.clicked.connect(self.delete_profile)
+        self.del_button.setMaximumWidth(400)
+        self.del_button.setStyleSheet("background-color:red;")
+
         self.main_layout.addWidget(self.scroll)
         self.main_layout.addWidget(self.button)
+        self.main_layout.addWidget(self.del_button)
 
 
         self.load_menu()
@@ -176,11 +182,21 @@ class MacroMenu(QWidget):
         self.layout.update()
         self.repaint()
 
-
+    def set_reset_method(self,method):
+        self.reset_method = method
 
     def add_widgets(self): # Creates a Widget within the Scroll Area
         new_label = MacroUI()
         self.layout.insertWidget(self.layout.count() - 1, new_label)
+
+    def delete_profile(self):
+        self.db_editor.delete_profile(self.json_editor.get_current_profile())
+        profiles = self.db_editor.get_profiles()
+        self.json_editor.set_profile(profiles[0])
+        win = self.window()
+        if win:
+            win.reload_window()
+
 
 
 

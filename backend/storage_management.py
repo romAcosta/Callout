@@ -44,6 +44,15 @@ class DatabaseEditor:
             conn.execute("INSERT OR IGNORE INTO profiles (name) VALUES (?)", (name,))
             conn.commit()
 
+    def delete_profile(self,name):
+        self.save_macros(name,[])
+        with self.connect() as conn:
+            cur = conn.execute("""
+                DELETE FROM profiles
+                WHERE profiles.name = ?
+            """,(name,))
+
+
     def get_macros(self, profile_name):
         with self.connect() as conn:
             cur = conn.execute("""
