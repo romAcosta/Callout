@@ -130,7 +130,7 @@ class MacroUI(QWidget):
 class MacroMenu(QWidget):
     def __init__(self, db_editor: DatabaseEditor, json_editor: JsonEditor, ):
         super().__init__()
-        self.reset_method = None
+
         self.db_editor = db_editor
         self.json_editor = json_editor
         self.main_layout = QVBoxLayout(self)
@@ -182,8 +182,7 @@ class MacroMenu(QWidget):
         self.layout.update()
         self.repaint()
 
-    def set_reset_method(self,method):
-        self.reset_method = method
+
 
     def add_widgets(self): # Creates a Widget within the Scroll Area
         new_label = MacroUI()

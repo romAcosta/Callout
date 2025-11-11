@@ -27,7 +27,6 @@ class Macro:
 
 
 class DatabaseEditor:
-    #TODO Add Profile Deleting
 
     def __init__(self, db_path="resources/callout.db"):
         self.db_path = db_path

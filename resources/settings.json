@@ -1,4 +1,5 @@
 {
-    "current_profile": "default",
-    "listening_mode": null
+    "current_profile": "anotha one",
+    "listening_mode": 3,
+    "command_word": "call out"
 }
