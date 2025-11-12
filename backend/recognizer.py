@@ -74,8 +74,10 @@ def run_recognizer(control_q, result_q):
                     macros = db_editor.get_macros(json_editor.get_current_profile())
                     phrases = db_editor.get_phrases(macros)
                     phrases.append(command_word)
-                    if phrases: rec.SetGrammar(json.dumps(phrases))
-
+                    if phrases: #rec.SetGrammar(json.dumps(phrases))
+                        stream.stop()
+                        rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
+                        stream.start()
                     print("Editing Saved")
 
                 elif command == "get_state":
