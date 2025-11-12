@@ -1,12 +1,14 @@
-﻿from PyQt6.QtCore import Qt, QTimer
+﻿
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import *
 import sys
 
+
 from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor
 from gui.new_profile_menu import NewProfileMenu
 from gui.ui_compenents import MacroUI, MacroMenu, ProfileDropdown
-
+from PyQt6.QtCore import QSize
 
 class MainWindow(QMainWindow ):
     def __init__(self, control_q, result_q):
@@ -22,6 +24,7 @@ class MainWindow(QMainWindow ):
 
         edit_profile_layout = QHBoxLayout()
         layout = QVBoxLayout()
+        top_layout = QHBoxLayout()
 
         self.setWindowTitle("Callout")
         self.setWindowIcon(QIcon("assets/icon.png"))
@@ -30,23 +33,36 @@ class MainWindow(QMainWindow ):
         self.menu.setEnabled(False)
         self.profile_dropdown = ProfileDropdown(self.db_editor,self.json_editor, self.menu, self.profile_changed)
         self.add_profile_button = QPushButton("Add Profile")
-        self.add_profile_button.setFixedSize(70, 25)
+        self.add_profile_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        self.add_profile_button.adjustSize()
+
 
 
         self.enable_button = QPushButton("Edit")
         self.enable_button.setCheckable(True)
-        self.enable_button.setFixedSize(40, 25)
+        self.enable_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        self.enable_button.adjustSize()
 
-        self.button = QPushButton("Pause")
-        self.button.setCheckable(True)
-        self.button.setFixedSize(60, 40)
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.setCheckable(True)
+        self.pause_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+        self.pause_button.adjustSize()
+
+        self.settings_button = QPushButton()
+        self.settings_button.setFixedSize(20, 20)
+        self.settings_button.setIcon(QIcon("assets/settings-icon.png"))
+        self.settings_button.setIconSize(QSize(20, 20))
+        self.settings_button.setFlat(True)
+        self.settings_button.setStyleSheet("background: transparent;")
 
         edit_profile_layout.addWidget(self.enable_button)
         edit_profile_layout.addWidget(self.profile_dropdown)
         edit_profile_layout.addWidget(self.add_profile_button)
 
+        top_layout.addWidget(self.pause_button,alignment=Qt.AlignmentFlag.AlignLeft)
+        top_layout.addWidget(self.settings_button, alignment=Qt.AlignmentFlag.AlignRight)
 
-        layout.addWidget(self.button)
+        layout.addLayout(top_layout)
         layout.addLayout(edit_profile_layout)
         layout.addWidget(self.menu)
 
@@ -56,7 +72,7 @@ class MainWindow(QMainWindow ):
         self.setCentralWidget(widget)
 
 
-        self.button.toggled.connect(self.the_button_was_toggled)
+        self.pause_button.toggled.connect(self.the_button_was_toggled)
         self.enable_button.toggled.connect(self.enable_macro_menu)
         self.add_profile_button.clicked.connect(self.open_new_profile_menu)
 
@@ -109,10 +125,10 @@ class MainWindow(QMainWindow ):
     def the_button_was_toggled(self, checked):
         if(checked):
             self.control_q.put("pause")
-            self.button.setText("Start")
+            self.pause_button.setText("Start")
         else:
             self.control_q.put("start")
-            self.button.setText("Pause")
+            self.pause_button.setText("Pause")
 
     def poll_results(self):
         while not self.result_q.empty():
@@ -120,10 +136,10 @@ class MainWindow(QMainWindow ):
 
             if isinstance(message, dict) and message.get("type") == "state":
                 paused = message["paused"]
-                self.button.setChecked(paused)
+                self.pause_button.setChecked(paused)
                 self.paused = paused
                 if paused:
-                    self.button.setText("Start")
+                    self.pause_button.setText("Start")
                 print("Backend says paused:", paused)
             else:
                 pass

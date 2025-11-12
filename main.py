@@ -1,7 +1,7 @@
 ﻿from multiprocessing import Process, Queue
 
 from PyQt6.QtCore import QTimer
-
+import sys
 from backend.storage_management import JsonEditor
 from backend.recognizer import run_recognizer
 from gui.tray_app import tray_app
@@ -23,7 +23,11 @@ if __name__ == "__main__":
     timer = QTimer()
     timer.timeout.connect(poll_results)
     timer.start(100)
-    app.setStyle("Fusion")
+    with open("gui/styles.qss", "r") as f:
+        qss = f.read()
+        app.setStyleSheet(qss)
+
+    # app.setStyle("Fusion")
     app.exec()
 
     control_q.put("stop")

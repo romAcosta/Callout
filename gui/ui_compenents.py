@@ -2,7 +2,7 @@ import time
 from symtable import Class
 
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QIcon
 from PyQt6.QtWidgets import *
 
 from backend.storage_management import JsonEditor, DatabaseEditor
@@ -32,17 +32,12 @@ class MacroUI(QWidget):
         self.inner_widget = QFrame()
         self.inner_widget.setFrameShape(QFrame.Shape.Box)
         self.inner_widget.setLineWidth(2)
-        self.inner_widget.setStyleSheet("""
-            QFrame {
-                background-color: #2b2b2b;    /* fill color */
-                border-radius: 8px;           /* rounded corners */
-                padding: 0.1px;                /* space inside border */
-            }
-        """)
+        self.inner_widget.setFixedWidth(425)
+
 
         #macro button
         self.macro_button = QPushButton()
-        self.macro_button.setFixedSize(50, 30)
+        self.macro_button.setFixedSize(60, 40)
         self.macro_button.setCheckable(True)
 
         self.macro_button.clicked.connect(self.listen_macro)
@@ -54,15 +49,16 @@ class MacroUI(QWidget):
 
         self.layout = QHBoxLayout(self)
         self.edit_box = QLineEdit(editable_label_text)
-        self.edit_box.setFixedSize(100, 30)
+        self.edit_box.setFixedSize(100, 40)
 
         self.text = QLabel("->")
         self.text.setFixedSize(40, 30)
 
 
 
-        self.delete_button = QPushButton("X")
-        self.delete_button.setFixedSize(20,20)
+        self.delete_button = QPushButton()
+        self.delete_button.setFixedSize(30,30)
+        self.delete_button.setIcon(QIcon("assets/trash-icon.png"))
         self.delete_button.setStyleSheet("""
             QPushButton {
                 background-color: #4b0000;
@@ -76,9 +72,12 @@ class MacroUI(QWidget):
         self.inner_layout = QHBoxLayout(self.inner_widget)
         self.inner_layout.addWidget(self.edit_box)
         self.inner_layout.addWidget(self.text)
-        self.inner_layout.addWidget(self.macro_button)
-        self.inner_layout.addWidget(self.delete_button)
-        self.inner_layout.setSizeConstraint(self.layout.SizeConstraint.SetFixedSize)
+        self.inner_layout.addWidget(self.macro_button, alignment=Qt.AlignmentFlag.AlignRight)
+        self.inner_layout.addWidget(self.delete_button, alignment=Qt.AlignmentFlag.AlignRight)
+        self.inner_widget.setSizePolicy(
+            QSizePolicy.Policy.Fixed,
+            QSizePolicy.Policy.Preferred
+        )
 
 
         self.main_layout.addWidget(self.inner_widget)
@@ -140,7 +139,7 @@ class MacroMenu(QWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.content)
-        self.scroll.setFixedWidth(400)
+        self.scroll.setFixedWidth(500)
         self.scroll.setMinimumHeight(500)
 
         self.layout = QVBoxLayout(self.content)
@@ -148,12 +147,12 @@ class MacroMenu(QWidget):
         # Add Macro Button
         self.button = QPushButton("Add Macro")
         self.button.clicked.connect(self.add_widgets)
-        self.button.setMaximumWidth(400)
+        self.button.setMaximumWidth(500)
 
         self.del_button = QPushButton("Delete Profile")
         self.del_button.clicked.connect(self.delete_profile)
-        self.del_button.setMaximumWidth(400)
-        self.del_button.setStyleSheet("background-color:red;")
+        self.del_button.setMaximumWidth(500)
+        self.del_button.setStyleSheet("background-color:#B82F24;")
 
         self.main_layout.addWidget(self.scroll)
         self.main_layout.addWidget(self.button)
@@ -203,7 +202,7 @@ class ProfileDropdown(QComboBox):
     def __init__(self, db_editor: DatabaseEditor, json_editor: JsonEditor, macro_menu: MacroMenu, save):
         super().__init__()
         self.save = save
-        self.setFixedSize(290,25)
+        self.setFixedSize(290,45)
         self.macro_menu = macro_menu
         self.json_editor = json_editor
         self.db_editor = db_editor

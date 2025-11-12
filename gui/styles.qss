@@ -1,0 +1,307 @@
+/* ============================================================
+     APERTURE SCIENCE — MID-DARK NEUMORPHIC ORANGE BOOST
+   More orange • More contrast • Sci-fi • Neumorphic
+   ============================================================ */
+
+/* ------------------------------
+   GLOBAL
+-------------------------------- */
+
+QWidget {
+    background-color: #26282D;
+    color: #F0F0F0;
+    font-family: "Segoe UI";
+    font-size: 14px;
+}
+
+QWidget:disabled {
+    color: #8A8D92;
+}
+
+
+/* ------------------------------
+   PANELS / QFRAME
+-------------------------------- */
+
+QFrame {
+    background-color: #2E3035;
+    border-radius: 12px;
+    padding: 10px;
+
+    box-shadow:
+        7px 7px 14px #202225,
+        -7px -7px 14px #3A3C42;
+}
+
+/* Orange border ALWAYS visible */
+QFrame[accent="true"] {
+    border: 2px solid #FF7A22;
+    box-shadow:
+        0px 0px 18px rgba(255,122,34,0.45),
+        inset 0 0 12px rgba(255,122,34,0.22);
+}
+
+/* SUPER bright active macro */
+QFrame[active="true"] {
+    border: 2px solid #FF9A42;
+    box-shadow:
+        0 0 18px rgba(255,154,66,0.65),
+        inset 0 0 16px rgba(255,154,66,0.30);
+}
+
+
+/* ------------------------------
+   BUTTONS — DEFAULT
+-------------------------------- */
+
+QPushButton {
+    background-color: #2F3137;
+    color: #FFFFFF;
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: 2px solid #FF7A22;   /* ORANGE BORDER ALWAYS ON */
+
+    box-shadow:
+        5px 5px 10px #25262A,
+        -5px -5px 10px #3A3C42;
+}
+
+QPushButton:hover {
+    background-color: #36383E;
+    border-color: #FF8E39; /* brighter */
+    box-shadow:
+        0 0 12px rgba(255,126,50,0.45),
+        5px 5px 10px #25262A,
+        -5px -5px 10px #3B3D43;
+}
+
+QPushButton:pressed {
+    background-color: #27292E;
+    border-color: #FF6A00;
+
+    box-shadow:
+        inset 4px 4px 7px #222327,
+        inset -4px -4px 7px #3B3D43;
+}
+
+QPushButton:disabled {
+    background-color: #292B30;
+    color: #8B8D92;
+    border-color: #994A1A;
+    box-shadow: none;
+}
+
+
+/* ------------------------------
+   ORANGE ACCENT BUTTONS
+-------------------------------- */
+
+QPushButton[accent="true"] {
+    background-color: #FF7A22;      /* MAIN ORANGE */
+    color: #1F1F21;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid #FF9A42;
+
+    box-shadow:
+        4px 4px 12px rgba(100,40,0,0.55),
+        -4px -4px 12px rgba(255,180,120,0.45),
+        0 0 14px rgba(255,122,34,0.45);
+}
+
+QPushButton[accent="true"]:hover {
+    background-color: #FF8F3A;
+    border-color: #FFB05C;
+}
+
+QPushButton[accent="true"]:pressed {
+    background-color: #E86811;
+    border-color: #FF6700;
+
+    box-shadow:
+        inset 4px 4px 8px rgba(0,0,0,0.45),
+        inset -4px -4px 8px rgba(255,200,150,0.35);
+}
+
+QPushButton[accent="true"]:disabled {
+    background-color: #A75529;
+    color: #E2D7D1;
+    border-color: #84401F;
+    box-shadow: none;
+}
+
+
+/* ------------------------------
+   LABELS
+-------------------------------- */
+
+QLabel {
+    color: #F0F0F0;
+}
+
+QLabel:disabled {
+    color: #8C9095;
+}
+
+
+/* ------------------------------
+   LINE EDIT
+-------------------------------- */
+
+QLineEdit {
+    background-color: #2F3137;
+    color: #FFFFFF;
+    padding: 8px 12px;
+    border-radius: 10px;
+
+    border: 2px solid #FF7A22;  /* ORANGE BORDER ALWAYS */
+    box-shadow:
+        inset 3px 3px 6px #222327,
+        inset -3px -3px 6px #3A3C42;
+}
+
+QLineEdit:focus {
+    border: 2px solid #FF9A42;
+    box-shadow:
+        0 0 12px rgba(255,154,66,0.45),
+        inset 3px 3px 6px #222327,
+        inset -3px -3px 6px #3A3C42;
+}
+
+QLineEdit:disabled {
+    background-color: #2A2C31;
+    color: #8A8F93;
+    border-color: #663711;
+}
+
+
+/* ------------------------------
+   CHECKBOXES — ORANGE BOOST
+-------------------------------- */
+
+QCheckBox {
+    spacing: 6px;
+}
+
+QCheckBox::indicator {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+
+    background-color: #2F3137;
+    border: 2px solid #FF7A22;
+
+    box-shadow:
+        3px 3px 6px #222327,
+        -3px -3px 6px #3A3C42;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #FF7A22;
+    border-color: #FF9A42;
+
+    box-shadow:
+        inset 2px 2px 5px rgba(0,0,0,0.35),
+        inset -2px -2px 5px rgba(255,200,150,0.35);
+}
+
+QCheckBox::indicator:disabled {
+    background-color: #2A2C31;
+    border-color: #8C502A;
+    box-shadow: none;
+}
+
+
+/* ------------------------------
+   COMBO BOX — ORANGE BORDER
+-------------------------------- */
+
+QComboBox {
+    background-color: #2F3137;
+    color: #FFFFFF;
+    border-radius: 10px;
+    padding: 6px 14px;
+    padding-right: 24px;
+    border: 2px solid #FF7A22;
+    box-shadow:
+        inset 3px 3px 6px #222327,
+        inset -3px -3px 6px #3A3C42;
+}
+
+QComboBox:hover {
+    border-color: #FF9A42;
+}
+
+QComboBox:disabled {
+    background-color: #2A2C31;
+    color: #8A8F93;
+    border-color: #8C502A;
+}
+
+
+QComboBox::drop-down {
+    width: 26px;
+    border: none;
+    background: transparent;
+}
+
+QComboBox::down-arrow {
+    width: 14px;
+    height: 14px;
+
+    /* You can use a custom arrow or let Qt draw it */
+    image: url(assets/arrow-icon.png);  /* replace with your icon */
+}
+
+
+
+/* ------------------------------
+   SCROLL AREA — ORANGE OUTLINE
+-------------------------------- */
+
+QScrollArea {
+    background-color: #2E3035;
+    border-radius: 12px;
+    padding: 6px;
+
+    border: 2px solid #FF7A22;
+    box-shadow:
+        inset 4px 4px 8px #222327,
+        inset -4px -4px 8px #3A3C42;
+}
+
+QScrollArea:disabled {
+    background-color: #292B2F;
+    border-color: #9F562E;
+}
+
+/* Scrollbar */
+QScrollBar:vertical {
+    background-color: #26282D;
+    width: 14px;
+    border-radius: 6px;
+
+    box-shadow:
+        inset 3px 3px 6px #1F2023,
+        inset -3px -3px 6px #323439;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #3A3D43;
+    border-radius: 6px;
+    border: 2px solid #FF7A22;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #FF7A22;
+}
+
+QScrollBar::handle:vertical:disabled {
+    background-color: #323439;
+    border-color: #8A4A22;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line {
+    height: 0;
+}
