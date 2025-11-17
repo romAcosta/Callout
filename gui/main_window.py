@@ -4,7 +4,7 @@ from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtWidgets import *
 import sys
 
-
+from backend.key_translator import translate_pyqt_to_pynput
 from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor
 from gui.frontend_utility import show_window
 from gui.new_profile_menu import NewProfileMenu
@@ -143,7 +143,7 @@ class MainWindow(QMainWindow ):
             widget = item.widget()
             if widget and hasattr(widget, "edit_box") and hasattr(widget, "macro_button"):
                 phrase = widget.edit_box.text()
-                command = widget.macro_button.text()
+                command = translate_pyqt_to_pynput(widget.macro_button.text())
                 macros.append(Macro(phrase,MacroType.KEYBOARD,command).to_dict())
 
         self.db_editor.save_macros(self.json_editor.get_current_profile(),macros)

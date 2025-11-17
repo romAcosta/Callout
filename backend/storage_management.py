@@ -13,6 +13,7 @@ from PyQt6.QtCore import QTimer
 
 class MacroType(Enum):
     KEYBOARD = 1
+    MEDIA_CONTROL = 2
 
 class Macro:
     def __init__(self, phrase:str, type:MacroType, command):

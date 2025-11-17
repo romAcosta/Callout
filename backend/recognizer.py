@@ -131,6 +131,7 @@ def run_recognizer(control_q, result_q):
                         elif not active_listening:
 
                             continue
+                    print("LISTEINGNNN")
                     execute_macro(phrases, text, macros)
                     speaking = False
                     silence_start = time.time()
@@ -160,13 +161,14 @@ def listen_for_name(text:str, command_word):
 
 def on_press(key):
     global key_held
-    if key == keyboard.Key.shift:
+    if key == keyboard.Key.alt_l:
         if not key_held: print("Key is being held")
         key_held = True
 
 
 def on_release(key):
     global key_held
-    if key == keyboard.Key.shift:
+    if key == keyboard.Key.alt_l:
         key_held = False
         print("Key released")
+

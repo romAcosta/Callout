@@ -1,6 +1,6 @@
 {
-    "current_profile": "default",
-    "listening_mode": 2,
+    "current_profile": "test 2 electric boogaloo",
+    "listening_mode": 1,
     "command_word": "call out",
     "listen_timer": 3.0,
     "command_key": "/"

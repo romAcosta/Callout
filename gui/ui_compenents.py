@@ -37,7 +37,7 @@ class MacroUI(QWidget):
 
         #macro button
         self.macro_button = QPushButton()
-        self.macro_button.setFixedSize(60, 40)
+        self.macro_button.setFixedSize(80, 40)
         self.macro_button.setCheckable(True)
 
         self.macro_button.clicked.connect(self.listen_macro)
