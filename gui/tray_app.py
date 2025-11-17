@@ -3,13 +3,14 @@
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon, QApplication
 
+from backend.utility import resource_path
 from gui.frontend_utility import show_window
 from gui.main_window import MainWindow
 
 
 def tray_app(control_q, result_q):
     app = QApplication(sys.argv)
-    tray = QSystemTrayIcon(QIcon("assets/icon.png"))
+    tray = QSystemTrayIcon(QIcon(resource_path("assets/icon.png")))
     tray.setToolTip("Callout")
     tray.show()
 

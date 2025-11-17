@@ -12,6 +12,7 @@ import time
 import queue
 from backend.macro_executor import execute_macro
 from backend.storage_management import JsonEditor, DatabaseEditor
+from backend.utility import resource_path
 
 
 class ListenMode(Enum):
@@ -25,7 +26,7 @@ key_held = False
 
 def run_recognizer(control_q, result_q):
     global active_listening, key_held
-    path = os.path.abspath("models/vosk-model-small-en-us-0.15")
+    path = os.path.abspath(resource_path("models/vosk-model-small-en-us-0.15"))
     model = vosk.Model(path)
 
     #load macros and phrases from json

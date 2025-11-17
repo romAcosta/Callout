@@ -6,6 +6,7 @@ import sys
 
 from backend.key_translator import translate_pyqt_to_pynput
 from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor
+from backend.utility import resource_path
 from gui.frontend_utility import show_window
 from gui.new_profile_menu import NewProfileMenu
 from gui.settings_menu import SettingsMenu
@@ -30,7 +31,7 @@ class MainWindow(QMainWindow ):
         top_layout = QHBoxLayout()
 
         self.setWindowTitle("Callout Config Menu")
-        self.setWindowIcon(QIcon("assets/icon-config.png"))
+        self.setWindowIcon(QIcon(resource_path("assets/icon-config.png")))
 
         self.menu = MacroMenu(self.db_editor, self.json_editor)
         self.menu.setEnabled(False)
@@ -40,7 +41,7 @@ class MainWindow(QMainWindow ):
         self.add_profile_button.adjustSize()
 
         self.logo = QLabel()
-        pix = QPixmap("assets/logo.png")
+        pix = QPixmap(resource_path("assets/logo.png"))
         pix = pix.scaled(
             154,65,
             Qt.AspectRatioMode.KeepAspectRatio,
@@ -61,7 +62,7 @@ class MainWindow(QMainWindow ):
 
         self.settings_button = QPushButton()
         self.settings_button.setFixedSize(40, 40)
-        self.settings_button.setIcon(QIcon("assets/settings-icon.png"))
+        self.settings_button.setIcon(QIcon(resource_path("assets/settings-icon.png")))
         self.settings_button.setIconSize(QSize(40, 40))
         self.settings_button.setFlat(True)
         self.settings_button.setStyleSheet("""QPushButton {

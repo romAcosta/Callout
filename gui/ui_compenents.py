@@ -6,6 +6,7 @@ from PyQt6.QtGui import QKeySequence, QIcon
 from PyQt6.QtWidgets import *
 
 from backend.storage_management import JsonEditor, DatabaseEditor
+from backend.utility import resource_path
 
 
 def clear_layout(layout):
@@ -58,7 +59,7 @@ class MacroUI(QWidget):
 
         self.delete_button = QPushButton()
         self.delete_button.setFixedSize(30,30)
-        self.delete_button.setIcon(QIcon("assets/trash-icon.png"))
+        self.delete_button.setIcon(QIcon(resource_path("assets/trash-icon.png")))
         self.delete_button.setStyleSheet("""
             QPushButton {
                 background-color: #4b0000;

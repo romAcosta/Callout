@@ -10,6 +10,8 @@ import portalocker
 import sqlite3
 from PyQt6.QtCore import QTimer
 
+from backend.utility import resource_path
+
 
 class MacroType(Enum):
     KEYBOARD = 1
@@ -29,7 +31,7 @@ class Macro:
 
 class DatabaseEditor:
 
-    def __init__(self, db_path="resources/callout.db"):
+    def __init__(self, db_path=resource_path("resources/callout.db")):
         self.db_path = db_path
 
     def connect(self):
@@ -99,21 +101,21 @@ class JsonEditor:
         return files
 
     def set_profile(self, profile):
-        with open(self.path + "/settings.json", 'r') as f:
+        with open(resource_path(self.path + "/settings.json"), 'r') as f:
             data = json.load(f)
         data["current_profile"] = profile
-        with open(self.path + "/settings.json", 'w') as f:
+        with open(resource_path(self.path + "/settings.json"), 'w') as f:
             json.dump(data,f,indent = 4)
 
     def set_listening_mode(self, mode):
 
         data = self.get_settings()
         data["listening_mode"] = mode
-        with open(self.path + "/settings.json", 'w') as f:
+        with open(resource_path(self.path + "/settings.json"), 'w') as f:
             json.dump(data,f,indent = 4)
 
     def get_settings(self):
-        with open(self.path + "/settings.json", 'r') as f:
+        with open(resource_path(self.path + "/settings.json"), 'r') as f:
             return json.load(f)
 
     def get_current_profile(self):
