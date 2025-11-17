@@ -1,19 +1,22 @@
 ﻿
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtWidgets import *
 import sys
 
 
 from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor
+from gui.frontend_utility import show_window
 from gui.new_profile_menu import NewProfileMenu
+from gui.settings_menu import SettingsMenu
 from gui.ui_compenents import MacroUI, MacroMenu, ProfileDropdown
 from PyQt6.QtCore import QSize
 
 class MainWindow(QMainWindow ):
     def __init__(self, control_q, result_q):
         super().__init__()
-        self.w = None
+        self.settings_window = None
+        self.new_profile_window = None
         self.db_editor = DatabaseEditor()
         self.json_editor = JsonEditor()
 
@@ -26,8 +29,8 @@ class MainWindow(QMainWindow ):
         layout = QVBoxLayout()
         top_layout = QHBoxLayout()
 
-        self.setWindowTitle("Callout")
-        self.setWindowIcon(QIcon("assets/icon.png"))
+        self.setWindowTitle("Callout Config Menu")
+        self.setWindowIcon(QIcon("assets/icon-config.png"))
 
         self.menu = MacroMenu(self.db_editor, self.json_editor)
         self.menu.setEnabled(False)
@@ -36,7 +39,15 @@ class MainWindow(QMainWindow ):
         self.add_profile_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
         self.add_profile_button.adjustSize()
 
-
+        self.logo = QLabel()
+        pix = QPixmap("assets/logo.png")
+        pix = pix.scaled(
+            154,65,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.logo.setPixmap(pix)
+        self.logo.setStyleSheet("background-color: transparent;")
 
         self.enable_button = QPushButton("Edit")
         self.enable_button.setCheckable(True)
@@ -49,20 +60,31 @@ class MainWindow(QMainWindow ):
         self.pause_button.adjustSize()
 
         self.settings_button = QPushButton()
-        self.settings_button.setFixedSize(20, 20)
+        self.settings_button.setFixedSize(40, 40)
         self.settings_button.setIcon(QIcon("assets/settings-icon.png"))
-        self.settings_button.setIconSize(QSize(20, 20))
+        self.settings_button.setIconSize(QSize(40, 40))
         self.settings_button.setFlat(True)
-        self.settings_button.setStyleSheet("background: transparent;")
+        self.settings_button.setStyleSheet("""QPushButton {
+            background-color: transparent;
+            color: #FFFFFF;
+            padding: 9px 20px;
+            border-radius: 30px;
+            border: 2px;  
+        
+            box-shadow:
+                5px 5px 10px #25262A,
+                -5px -5px 10px #3A3C42;
+        }""")
 
         edit_profile_layout.addWidget(self.enable_button)
         edit_profile_layout.addWidget(self.profile_dropdown)
         edit_profile_layout.addWidget(self.add_profile_button)
 
-        top_layout.addWidget(self.pause_button,alignment=Qt.AlignmentFlag.AlignLeft)
+        top_layout.addWidget(self.logo,alignment=Qt.AlignmentFlag.AlignLeft)
         top_layout.addWidget(self.settings_button, alignment=Qt.AlignmentFlag.AlignRight)
 
         layout.addLayout(top_layout)
+        layout.addWidget(self.pause_button)
         layout.addLayout(edit_profile_layout)
         layout.addWidget(self.menu)
 
@@ -71,7 +93,7 @@ class MainWindow(QMainWindow ):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-
+        self.settings_button.clicked.connect(self.open_settings_menu)
         self.pause_button.toggled.connect(self.the_button_was_toggled)
         self.enable_button.toggled.connect(self.enable_macro_menu)
         self.add_profile_button.clicked.connect(self.open_new_profile_menu)
@@ -84,11 +106,17 @@ class MainWindow(QMainWindow ):
 
         # Get the backends current state
         self.control_q.put("get_state")
+        
+    def open_settings_menu(self):
+        self.settings_window = SettingsMenu(self.json_editor,self.control_q)
+        self.settings_window.setWindowTitle("Callout- Settings")
+        show_window(self.settings_window)
 
 
     def open_new_profile_menu(self):
-        self.w = NewProfileMenu(self.db_editor,self.profile_dropdown)
-        self.w.show()
+        self.new_profile_window = NewProfileMenu(self.db_editor, self.profile_dropdown)
+        self.new_profile_window.setWindowTitle("Callout- Create New Profile")
+        show_window(self.new_profile_window)
 
     def enable_macro_menu(self, checked):
         if(checked):

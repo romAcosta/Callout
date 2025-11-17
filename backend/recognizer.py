@@ -3,6 +3,7 @@ import os
 import threading
 from enum import Enum
 
+from pynput import keyboard
 import numpy as np
 
 import vosk
@@ -20,9 +21,10 @@ class ListenMode(Enum):
 
 timer = None
 active_listening = True
+key_held = False
 
 def run_recognizer(control_q, result_q):
-    global active_listening
+    global active_listening, key_held
     path = os.path.abspath("models/vosk-model-small-en-us-0.15")
     model = vosk.Model(path)
 
@@ -30,9 +32,13 @@ def run_recognizer(control_q, result_q):
     db_editor = DatabaseEditor()
     json_editor = JsonEditor()
 
+    listener = keyboard.Listener(on_press=on_press, on_release=on_release)
+    listener.start()
+
     command_word = json_editor.get_settings()["command_word"]
     macros = db_editor.get_macros(json_editor.get_current_profile())
     phrases = db_editor.get_phrases(macros)
+    phrases.append(command_word)
 
     silence_start = time.time()
     speaking = False
@@ -46,6 +52,7 @@ def run_recognizer(control_q, result_q):
     listening = True
     editing = False
 
+
     print("Listening Mode: " + str(listening_mode))
 
     with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
@@ -58,16 +65,16 @@ def run_recognizer(control_q, result_q):
                     break
                 elif command == "start":
                     listening = True
-                    print("Listening started")
+                    print("Recognizer: Listening started")
 
                 elif command == "pause":
                     listening = False
-                    print("Listening paused")
+                    print("Recognizer: Listening paused")
 
                 elif command == "edit":
                     editing = True
 
-                    print("Editing Started")
+                    print("Recognizer: Editing Started")
 
                 elif command == "save":
                     editing = False
@@ -78,7 +85,11 @@ def run_recognizer(control_q, result_q):
                         stream.stop()
                         rec = vosk.KaldiRecognizer(model, 16000, json.dumps(phrases))
                         stream.start()
-                    print("Editing Saved")
+                    print("Recognizer: Editing Saved")
+
+                elif command == "listen_mode_changed":
+                    listening_mode = ListenMode(json_editor.get_settings()["listening_mode"])
+                    print("Recognizer: Listen Mode Changed")
 
                 elif command == "get_state":
                     result_q.put({"type": "state", "paused": not listening})
@@ -87,8 +98,7 @@ def run_recognizer(control_q, result_q):
             except queue.Empty:
                 pass
 
-            if listening_mode == ListenMode.OPEN_MIC:
-                pass
+
 
 
 
@@ -99,7 +109,11 @@ def run_recognizer(control_q, result_q):
             if listening and not editing:
 
                 if listening_mode == ListenMode.PUSH_TO_TALK:  # TODO
-                    continue
+                    if key_held:
+                        pass
+                    else:
+                        continue
+
                 if level > threshold: #Checks if amplitude is at speaking threshold
 
                     rec.AcceptWaveform(bytes(data))
@@ -108,8 +122,8 @@ def run_recognizer(control_q, result_q):
                 elif speaking and time.time() - silence_start > 0.2: #Forces a speach check after x amount of time passes
 
                     text = rec.FinalResult()
-                    if listening_mode == ListenMode.VOICE_ACTIVATION:  # TODO
-                        if listen_for_name(text,command_word):# and not active_listening:
+                    if listening_mode == ListenMode.VOICE_ACTIVATION:
+                        if listen_for_name(text,command_word):
                             active_listening = True
                             print("is_ready =", active_listening)
                             start_or_reset_timer()
@@ -140,4 +154,19 @@ def listen_for_name(text:str, command_word):
     if text.__contains__(command_word):
 
         return True
+
     return False
+
+
+def on_press(key):
+    global key_held
+    if key == keyboard.Key.shift:
+        if not key_held: print("Key is being held")
+        key_held = True
+
+
+def on_release(key):
+    global key_held
+    if key == keyboard.Key.shift:
+        key_held = False
+        print("Key released")

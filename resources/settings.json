@@ -1,5 +1,7 @@
 {
     "current_profile": "default",
-    "listening_mode": 3,
-    "command_word": "call out"
+    "listening_mode": 2,
+    "command_word": "call out",
+    "listen_timer": 3.0,
+    "command_key": "/"
 }

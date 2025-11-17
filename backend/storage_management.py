@@ -104,6 +104,13 @@ class JsonEditor:
         with open(self.path + "/settings.json", 'w') as f:
             json.dump(data,f,indent = 4)
 
+    def set_listening_mode(self, mode):
+
+        data = self.get_settings()
+        data["listening_mode"] = mode
+        with open(self.path + "/settings.json", 'w') as f:
+            json.dump(data,f,indent = 4)
+
     def get_settings(self):
         with open(self.path + "/settings.json", 'r') as f:
             return json.load(f)

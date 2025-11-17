@@ -1,42 +1,55 @@
-﻿from PyQt6.QtGui import QWindow
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QLineEdit
+﻿from multiprocessing.queues import Queue
+
+from PyQt6.QtGui import QWindow
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QLineEdit, QComboBox
+
 
 from backend.storage_management import DatabaseEditor, JsonEditor
 from gui.ui_compenents import ProfileDropdown
 
 class SettingsMenu(QWidget):
-    def __init__(self,json_editor: JsonEditor, profile_dropdown: ProfileDropdown):
+    def __init__(self,json_editor: JsonEditor, control_q: Queue):
         super().__init__()
-        self.profile_dropdown = profile_dropdown
+
+        self.control_q = control_q
         self.json_editor = json_editor
 
         layout = QVBoxLayout()
-        button_layout =QHBoxLayout()
 
-        self.cancel_button = QPushButton("Cancel")
-        self.create_button = QPushButton("Create")
 
-        button_layout.addWidget(self.cancel_button)
-        button_layout.addWidget(self.create_button)
+        self.label = QLabel("Settings")
+        self.listen_mode_layout = QHBoxLayout()
+        self.command_word_layout = QHBoxLayout()
 
-        self.label = QLabel("Create New Profile")
+        self.listen_mode_label = QLabel("Listening Mode:")
+        self.listen_mode_dropdown = QComboBox()
 
-        self.error_label = QLabel("Name cannot be empty!")
-        self.error_label.hide()
-        self.error_label.setStyleSheet("""
-            color:#ff3d28;
-        """)
+        self.listen_mode_dropdown.addItem("Open Microphone")
+        self.listen_mode_dropdown.addItem("Push to Talk")
+        self.listen_mode_dropdown.addItem("Voice Activation")
+        self.listen_mode_dropdown.setCurrentIndex(json_editor.get_settings()["listening_mode"] - 1)
 
-        self.text_box = QLineEdit()
-        self.text_box.setPlaceholderText("Profile Name")
+        self.listen_mode_layout.addWidget(self.listen_mode_label)
+        self.listen_mode_layout.addWidget(self.listen_mode_dropdown)
+
+
+        #TODO Maybe include customization for listening mode
+
+
+
+
 
         # self.create_button.clicked.connect(self.create_profile)
         # self.cancel_button.clicked.connect(self.close)
 
-
         layout.addWidget(self.label)
-        layout.addWidget(self.error_label)
-        layout.addWidget(self.text_box)
-        layout.addLayout(button_layout)
+        layout.addLayout(self.listen_mode_layout)
+        layout.addLayout(self.command_word_layout)
+
+        self.listen_mode_dropdown.currentIndexChanged.connect(self.change_listening_mode)
 
         self.setLayout(layout)
+
+    def change_listening_mode(self):
+        self.json_editor.set_listening_mode(self.listen_mode_dropdown.currentIndex()+1)
+        self.control_q.put("listen_mode_changed")
