@@ -22,6 +22,22 @@ def clear_layout(layout):
         elif item.layout() is not None:
             clear_layout(item.layout())
 
+class UILabelLayout(QWidget):
+    def __init__(self,label, widgets):
+        super().__init__()
+        self.layout = QVBoxLayout(self)
+        self.label_widget = QLabel(label)
+        self.label_widget.setStyleSheet(
+            """
+            font-size: 12px;
+            padding: 0px;
+            """
+        )
+
+
+        self.layout.addWidget(self.label_widget,alignment=Qt.AlignmentFlag.AlignLeft)
+        for widget in widgets:
+            self.layout.addWidget(widget)
 
 class MacroUI(QWidget):
     def __init__(self, phrase = None, command = None):
@@ -33,14 +49,13 @@ class MacroUI(QWidget):
         self.inner_widget = QFrame()
         self.inner_widget.setFrameShape(QFrame.Shape.Box)
         self.inner_widget.setLineWidth(2)
-        self.inner_widget.setFixedWidth(425)
+        self.inner_widget.setFixedWidth(500)
 
 
         #macro button
         self.macro_button = QPushButton()
         self.macro_button.setFixedSize(80, 40)
         self.macro_button.setCheckable(True)
-
         self.macro_button.clicked.connect(self.listen_macro)
 
         editable_label_text = None
@@ -55,6 +70,9 @@ class MacroUI(QWidget):
         self.text = QLabel("->")
         self.text.setFixedSize(40, 30)
 
+        self.type_dropdown = QComboBox()
+        self.type_dropdown.addItem("Keyboard")
+        self.type_dropdown.addItem("Media Control")
 
 
         self.delete_button = QPushButton()
@@ -71,9 +89,10 @@ class MacroUI(QWidget):
 
 
         self.inner_layout = QHBoxLayout(self.inner_widget)
-        self.inner_layout.addWidget(self.edit_box)
+        self.inner_layout.addWidget(UILabelLayout("Phrase",[self.edit_box]))
+        self.inner_layout.addWidget(UILabelLayout("Macro Type",[self.type_dropdown]))
         self.inner_layout.addWidget(self.text)
-        self.inner_layout.addWidget(self.macro_button, alignment=Qt.AlignmentFlag.AlignRight)
+        self.inner_layout.addWidget(UILabelLayout("Macro",[self.macro_button]), alignment=Qt.AlignmentFlag.AlignRight)
         self.inner_layout.addWidget(self.delete_button, alignment=Qt.AlignmentFlag.AlignRight)
         self.inner_widget.setSizePolicy(
             QSizePolicy.Policy.Fixed,
@@ -131,6 +150,8 @@ class MacroMenu(QWidget):
     def __init__(self, db_editor: DatabaseEditor, json_editor: JsonEditor, ):
         super().__init__()
 
+        menu_width = 560
+
         self.db_editor = db_editor
         self.json_editor = json_editor
         self.main_layout = QVBoxLayout(self)
@@ -140,7 +161,7 @@ class MacroMenu(QWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.content)
-        self.scroll.setFixedWidth(500)
+        self.scroll.setFixedWidth(menu_width)
         self.scroll.setMinimumHeight(500)
 
         self.layout = QVBoxLayout(self.content)
@@ -148,11 +169,11 @@ class MacroMenu(QWidget):
         # Add Macro Button
         self.button = QPushButton("Add Macro")
         self.button.clicked.connect(self.add_widgets)
-        self.button.setMaximumWidth(500)
+        self.button.setMaximumWidth(menu_width)
 
         self.del_button = QPushButton("Delete Profile")
         self.del_button.clicked.connect(self.delete_profile)
-        self.del_button.setMaximumWidth(500)
+        self.del_button.setMaximumWidth(menu_width)
         self.del_button.setStyleSheet("background-color:#B82F24;")
 
         self.main_layout.addWidget(self.scroll)

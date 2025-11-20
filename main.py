@@ -2,19 +2,6 @@
 # import ctypes
 # from ctypes import wintypes
 
-# def already_running():
-#     mutex = ctypes.windll.kernel32.CreateMutexW(None, wintypes.BOOL(True), "Callout_SingleInstance_Mutex")
-#     last_error = ctypes.windll.kernel32.GetLastError()
-#
-#     # ERROR_ALREADY_EXISTS == 183
-#     if last_error == 183:
-#         return True
-#     return False
-#
-# if already_running():
-#     # Optional: show a dialog or silently exit
-#     print("Callout is already running.")
-#     sys.exit(0)
 
 from multiprocessing import Process, Queue
 from PyQt6.QtCore import QTimer
