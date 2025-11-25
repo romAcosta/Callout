@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import *
 import sys
 
 from backend.key_translator import translate_pyqt_to_pynput
-from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor
+from backend.storage_management import Macro, MacroType, JsonEditor, DatabaseEditor, JsonPorter
 from backend.utility import resource_path
 from gui.frontend_utility import show_window
 from gui.new_profile_menu import NewProfileMenu
@@ -16,10 +16,10 @@ from PyQt6.QtCore import QSize
 class MainWindow(QMainWindow ):
     def __init__(self, control_q, result_q):
         super().__init__()
-        self.settings_window = None
-        self.new_profile_window = None
+
         self.db_editor = DatabaseEditor()
         self.json_editor = JsonEditor()
+
 
         # Set Queues
         self.control_q = control_q
@@ -81,6 +81,20 @@ class MainWindow(QMainWindow ):
         edit_profile_layout.addWidget(self.profile_dropdown)
         edit_profile_layout.addWidget(self.add_profile_button)
 
+        self.export_button = QPushButton("Export Profile")
+        self.export_button.clicked.connect(self.export_profile)
+        self.export_button.setMaximumWidth(self.menu.menu_width)
+
+        self.export_button_confirmation_text = QLabel("Export Successful!")
+        self.export_button_confirmation_text.setStyleSheet("""
+            QLabel{
+            font-family: "Segoe UI";
+            background-color: transparent;
+            padding: 2px;
+            }
+        """)
+        self.export_button_confirmation_text.hide()
+
         top_layout.addWidget(self.logo,alignment=Qt.AlignmentFlag.AlignLeft)
         top_layout.addWidget(self.settings_button, alignment=Qt.AlignmentFlag.AlignRight)
 
@@ -88,11 +102,14 @@ class MainWindow(QMainWindow ):
         layout.addWidget(self.pause_button)
         layout.addLayout(edit_profile_layout)
         layout.addWidget(self.menu)
+        layout.addWidget(self.export_button_confirmation_text, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.export_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
+        self.setFixedWidth(self.menu.menu_width + 40)
 
         self.settings_button.clicked.connect(self.open_settings_menu)
         self.pause_button.toggled.connect(self.the_button_was_toggled)
@@ -104,10 +121,18 @@ class MainWindow(QMainWindow ):
         self.timer.timeout.connect(self.poll_results)
         QTimer.singleShot(0, lambda: self.timer.start(50))
 
+        self.settings_window = SettingsMenu(self.json_editor,self.control_q)
+        self.new_profile_window = NewProfileMenu(self.db_editor, self.profile_dropdown)
 
         # Get the backends current state
-        self.control_q.put("get_state")
-        
+        self.control_q.put({"command":"get_state"})
+
+    def export_profile(self):
+        jp = JsonPorter()
+        jp.export_profile(self.json_editor.get_current_profile())
+        self.export_button_confirmation_text.show()
+
+
     def open_settings_menu(self):
         self.settings_window = SettingsMenu(self.json_editor,self.control_q)
         self.settings_window.setWindowTitle("Callout- Settings")
@@ -121,20 +146,22 @@ class MainWindow(QMainWindow ):
 
     def enable_macro_menu(self, checked):
         if(checked):
-            self.control_q.put("edit")
+            self.control_q.put({"command":"edit"})
             self.enable_button.setText("Save")
             self.menu.setEnabled(True)
+            self.export_button.setEnabled(False)
         else:
             self.save_macros()
 
             self.enable_button.setText("Edit")
             self.menu.setEnabled(False)
-
-            self.control_q.put("save")
+            self.export_button.setEnabled(True)
+            self.control_q.put({"command":"save"})
 
     def profile_changed(self):
         print("(DEBUG) Profile Changed")
-        self.control_q.put("save")
+        self.control_q.put({"command":"save"})
+        self.export_button_confirmation_text.hide()
 
     def save_macros(self):
 
@@ -144,8 +171,13 @@ class MainWindow(QMainWindow ):
             widget = item.widget()
             if widget and hasattr(widget, "edit_box") and hasattr(widget, "macro_button"):
                 phrase = widget.edit_box.text()
-                command = translate_pyqt_to_pynput(widget.macro_button.text())
-                macros.append(Macro(phrase,MacroType.KEYBOARD,command).to_dict())
+                type = MacroType(widget.type_index)
+                command = 0
+                if type == MacroType.KEYBOARD:
+                    command = translate_pyqt_to_pynput(widget.macro_button.text())
+                elif type == MacroType.MEDIA_CONTROL:
+                    command = widget.media_macro_dropdown.currentText()
+                macros.append(Macro(phrase,type,command).to_dict())
 
         self.db_editor.save_macros(self.json_editor.get_current_profile(),macros)
 
@@ -153,10 +185,10 @@ class MainWindow(QMainWindow ):
 
     def the_button_was_toggled(self, checked):
         if(checked):
-            self.control_q.put("pause")
+            self.control_q.put({"command":"pause"})
             self.pause_button.setText("Start")
         else:
-            self.control_q.put("start")
+            self.control_q.put({"command":"start"})
             self.pause_button.setText("Pause")
 
     def poll_results(self):
@@ -183,13 +215,15 @@ class MainWindow(QMainWindow ):
         if self.enable_button.isChecked():
             self.enable_button.toggle()
 
+        self.new_profile_window.hide()
+        self.settings_window.hide()
         self.hide()
         self.timer.stop()
 
     def showEvent(self, event):
         super().showEvent(event)
 
-        self.control_q.put("get_state")
+        self.control_q.put({"command":"get_state"})
         if not self.timer.isActive():
             self.timer.start(50)
 

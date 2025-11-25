@@ -1,0 +1,10 @@
+﻿{
+    "profile_name": "new",
+    "macros": [
+        {
+            "phrase": "q",
+            "command": "q",
+            "type": "1"
+        }
+    ]
+}

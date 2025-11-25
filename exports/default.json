@@ -1,0 +1,35 @@
+{
+    "profile_name": "default",
+    "macros": [
+        {
+            "phrase": "q",
+            "command": "q",
+            "type": "1"
+        },
+        {
+            "phrase": "w",
+            "command": "Play/Pause",
+            "type": "2"
+        },
+        {
+            "phrase": "ee",
+            "command": "Play/Pause",
+            "type": "2"
+        },
+        {
+            "phrase": "r",
+            "command": "r",
+            "type": "1"
+        },
+        {
+            "phrase": "d",
+            "command": "d",
+            "type": "1"
+        },
+        {
+            "phrase": "f",
+            "command": "f",
+            "type": "1"
+        }
+    ]
+}

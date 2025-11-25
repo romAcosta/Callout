@@ -8,6 +8,8 @@ from pathlib import Path
 
 import portalocker
 import sqlite3
+
+import yaml
 from PyQt6.QtCore import QTimer
 
 from backend.utility import resource_path
@@ -16,6 +18,7 @@ from backend.utility import resource_path
 class MacroType(Enum):
     KEYBOARD = 1
     MEDIA_CONTROL = 2
+    APP_OPEN = 3
 
 class Macro:
     def __init__(self, phrase:str, type:MacroType, command):
@@ -78,6 +81,9 @@ class DatabaseEditor:
             if pid is None:
                 conn.execute("INSERT INTO profiles (name) VALUES (?)", (profile_name,))
                 pid = conn.execute("SELECT id FROM profiles WHERE name = ?", (profile_name,)).fetchone()
+            for m in macros:
+                if "command" not in m or "type" not in m or "phrase" not in m:
+                    print("Database Editor: Invalid Macros cannot Save")
             pid = pid[0]
             conn.execute("DELETE FROM macros WHERE profile_id = ?", (pid,))
             conn.executemany("""
@@ -121,40 +127,44 @@ class JsonEditor:
     def get_current_profile(self):
         return self.get_settings()["current_profile"]
 
+class JsonPorter:
+    def __init__(self):
+        super().__init__()
+        self.path = resource_path("exports")
+
+    def export_profile(self, profile_name):
+
+        db = DatabaseEditor()
+        data = {"profile_name":profile_name, "macros":[]}
+        macros = db.get_macros(profile_name)
+        for macro in macros:
+            data["macros"].append(macro)
+
+        with open(self.path + "/" + profile_name + ".json", 'w') as f:
+            # yaml.dump(data,f,sort_keys=False)
+            json.dump(data,f,indent=4)
 
 
 
+    def import_profile(self, file_path):
+        data = {}
+        with open(file_path,'r', encoding='utf-8-sig') as f:
+            data = json.load(f)
 
-# conn = sqlite3.connect("../resources/callout.db")
-# cursor = conn.cursor()
-#
-# cursor.execute("""
-# CREATE TABLE IF NOT EXISTS profiles (
-#     id INTEGER PRIMARY KEY AUTOINCREMENT,
-#     name TEXT UNIQUE NOT NULL
-# )
-# """)
-#
-# cursor.execute("""
-# CREATE TABLE IF NOT EXISTS macros (
-#     id INTEGER PRIMARY KEY AUTOINCREMENT,
-#     profile_id INTEGER,
-#     phrase TEXT NOT NULL,
-#     command TEXT NOT NULL,
-#     type TEXT,
-#     FOREIGN KEY(profile_id) REFERENCES profiles(id)
-# )
-# """)
+        if "macros" not in data or "profile_name" not in data:
+            print("Profile Porter: JSON missing required field")
+            return None
 
+        profile_name = data["profile_name"]
+        if not isinstance(profile_name, str):
+            print("Profile Porter: Profile name not of type String")
+            return None
 
-#
-#
-# print(db.get_macros("default"))
-#
-# conn.commit()
-# conn.close()
+        macros = data["macros"]
 
+        db = DatabaseEditor()
+        db.add_profile(profile_name)
+        db.save_macros(profile_name,macros)
 
-# j = JSON_Editor("../resources/profiles")
-# print(j.GetProfileName("settings.json"))
-# j.SaveMacro(Macro("portalocker.Lock",MacroType.KEYBOARD,"L"))
+        print("Profile Porter: We are okay!")
+        return profile_name

@@ -32,7 +32,7 @@ def run_recognizer(control_q, result_q):
     #load macros and phrases from json
     db_editor = DatabaseEditor()
     json_editor = JsonEditor()
-
+    DEVICE_INDEX = 1
     listener = keyboard.Listener(on_press=on_press, on_release=on_release)
     listener.start()
 
@@ -56,12 +56,13 @@ def run_recognizer(control_q, result_q):
 
     print("Listening Mode: " + str(listening_mode))
 
-    with sd.RawInputStream(samplerate=16000, blocksize=2048, dtype='int16',
+    with sd.RawInputStream(device= DEVICE_INDEX,samplerate=16000, blocksize=2048, dtype='int16',
                            channels=1, latency='low') as stream:
         while True:
 
             try:
-                command = control_q.get_nowait()
+                msg = control_q.get_nowait()
+                command = msg["command"]
                 if command == "exit":
                     break
                 elif command == "start":
@@ -92,8 +93,14 @@ def run_recognizer(control_q, result_q):
                     listening_mode = ListenMode(json_editor.get_settings()["listening_mode"])
                     print("Recognizer: Listen Mode Changed")
 
+                elif command == "ptt_key_changed":
+                    listening_mode = ListenMode(json_editor.get_settings()["listening_mode"])
+                    print("Recognizer: Listen Mode Changed")
+
                 elif command == "get_state":
                     result_q.put({"type": "state", "paused": not listening})
+
+
                 elif command == "exit":
                     break
             except queue.Empty:
@@ -132,7 +139,7 @@ def run_recognizer(control_q, result_q):
                         elif not active_listening:
 
                             continue
-                    print("LISTEINGNNN")
+
                     execute_macro(phrases, text, macros)
                     speaking = False
                     silence_start = time.time()

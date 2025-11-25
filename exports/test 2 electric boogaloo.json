@@ -1,0 +1,15 @@
+{
+    "profile_name": "test 2 electric boogaloo",
+    "macros": [
+        {
+            "phrase": "pause",
+            "command": "Play/Pause",
+            "type": "2"
+        },
+        {
+            "phrase": "okay",
+            "command": "a",
+            "type": "1"
+        }
+    ]
+}

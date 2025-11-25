@@ -37,8 +37,8 @@ def tray_app(control_q, result_q):
 
 
     window_action.triggered.connect(lambda: show_window(w))
-    start_action.triggered.connect(lambda : control_q.put("start"))
-    stop_action.triggered.connect(lambda : control_q.put("pause"))
+    start_action.triggered.connect(lambda : control_q.put({"command":"start"}))
+    stop_action.triggered.connect(lambda : control_q.put({"command":"pause"}))
     exit_action.triggered.connect(lambda : exit_recognizer(control_q,app,tray))
 
     return app, tray
@@ -46,6 +46,6 @@ def tray_app(control_q, result_q):
 def exit_recognizer(control_q, app, tray):
     print("Exiting...")
     tray.hide()
-    control_q.put("exit")
+    control_q.put({"command":"exit"})
     app.quit()
 
