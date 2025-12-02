@@ -120,6 +120,13 @@ class JsonEditor:
         with open(resource_path(self.path + "/settings.json"), 'w') as f:
             json.dump(data,f,indent = 4)
 
+    def set_threshold(self, threshold):
+
+        data = self.get_settings()
+        data["threshold"] = threshold
+        with open(resource_path(self.path + "/settings.json"), 'w') as f:
+            json.dump(data,f,indent = 4)
+
     def get_settings(self):
         with open(resource_path(self.path + "/settings.json"), 'r') as f:
             return json.load(f)

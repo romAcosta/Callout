@@ -1,4 +1,4 @@
-﻿#TODO  DO THIS NEXT
+﻿
 
 pyqt6_special_keys = [
     "alt",

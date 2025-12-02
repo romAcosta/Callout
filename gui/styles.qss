@@ -305,3 +305,45 @@ QScrollBar::add-line,
 QScrollBar::sub-line {
     height: 0;
 }
+
+/* ------------------------------
+   HORIZONTAL SLIDER
+-------------------------------- */
+
+QSlider::groove:horizontal {
+    background: #2F3137;
+    height: 8px;
+    border-radius: 4px;
+
+    /* Neumorphic inset effect */
+    box-shadow:
+        inset 2px 2px 4px #222327,
+        inset -2px -2px 4px #3A3C42;
+}
+
+QSlider::handle:horizontal {
+    background: #FF7A22;            /* main orange */
+    width: 20px;
+    height: 20px;
+    margin: -6px 0;                 /* centers the handle on the groove */
+
+    border-radius: 10px;
+    border: 2px solid #FF9A42;
+
+    box-shadow:
+        0 0 10px rgba(255,122,34,0.5),
+        inset 1px 1px 3px rgba(0,0,0,0.35),
+        inset -1px -1px 3px rgba(255,200,150,0.25);
+}
+
+QSlider::handle:horizontal:hover {
+    background: #FF8E39;
+    border-color: #FFB05C;
+}
+
+QSlider::handle:horizontal:pressed {
+    background: #E96812;
+    box-shadow:
+        inset 3px 3px 6px rgba(0,0,0,0.45),
+        inset -3px -3px 6px rgba(255,200,150,0.25);
+}

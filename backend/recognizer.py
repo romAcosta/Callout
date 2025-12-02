@@ -43,7 +43,7 @@ def run_recognizer(control_q, result_q):
 
     silence_start = time.time()
     speaking = False
-    threshold = 500
+    threshold = json_editor.get_settings()["threshold"]
 
     listening_mode = ListenMode(json_editor.get_settings()["listening_mode"])
     active_listening = False
@@ -92,6 +92,10 @@ def run_recognizer(control_q, result_q):
                 elif command == "listen_mode_changed":
                     listening_mode = ListenMode(json_editor.get_settings()["listening_mode"])
                     print("Recognizer: Listen Mode Changed")
+
+                elif command == "threshold_changed":
+                    threshold = json_editor.get_settings()["threshold"]
+                    print("Recognizer: Threshold Changed to " + str(threshold))
 
                 elif command == "ptt_key_changed":
                     listening_mode = ListenMode(json_editor.get_settings()["listening_mode"])

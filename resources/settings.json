@@ -1,7 +1,8 @@
 {
     "current_profile": "new",
-    "listening_mode": 2,
+    "listening_mode": 1,
     "command_word": "call out",
     "listen_timer": 3.0,
-    "command_key": "/"
+    "command_key": "/",
+    "threshold": 700
 }
